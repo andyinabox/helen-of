@@ -13,6 +13,7 @@ Release Notes
 Todo
 ----
 
+ - [ ] Face rotation
  - [ ] Add "crossfade" to avg shader
  - [ ] Slow it down! Or variable speed
  - [ ] Threaded image loading
