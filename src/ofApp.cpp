@@ -96,8 +96,9 @@ float ofApp::getHeight() {
 void ofApp::addHelenFbo(ofxJSONElement item, bool draw) {
 
     ofImage img;
-    img.load(getImagePath(item));
-    img.update();
+//    img.load(getImagePath(item));
+//    img.update();
+    imageLoader.loadFromDisk(img, getImagePath(item));
     images.push_back(img);
     
     ofFbo fbo;
@@ -121,7 +122,9 @@ void ofApp::pushHelenFbo(ofxJSONElement item, bool draw) {
   std::rotate(fbos.begin(), fbos.begin()+1, fbos.end());
   std::rotate(images.begin(), images.begin()+1, images.end());
 
-  images[end].load(getImagePath(item));
+//  images[end].load(getImagePath(item));
+  images[end].clear();
+  imageLoader.loadFromDisk(images[end], getImagePath(item));
 
   if(draw) {
     drawHelenFbo(item, end);
@@ -140,7 +143,11 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
     ofPushMatrix();
       ofTranslate((ofApp::getWidth()-(baseImgWidth*scale))/2, 0);
       ofScale(scale, scale);
-      images[index].draw(0, 0);
+  
+      if(images[index].isAllocated()) {
+        images[index].update();
+        images[index].draw(0, 0);
+      }
     
       // draw face points
       for(auto p : annotations) {

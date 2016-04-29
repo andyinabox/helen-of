@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		C17D68721CD2B84C00AFE2FB /* ofxJSONElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C17D68681CD2B84C00AFE2FB /* ofxJSONElement.cpp */; };
 		C17D68731CD2B84C00AFE2FB /* jsoncpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C17D68711CD2B84C00AFE2FB /* jsoncpp.cpp */; };
+		C1ACEBE11CD3AB38003F16DC /* ofxThreadedImageLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C1ACEBDF1CD3AB38003F16DC /* ofxThreadedImageLoader.cpp */; };
 		E4328149138ABC9F0047C5CB /* openFrameworksDebug.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E4328148138ABC890047C5CB /* openFrameworksDebug.a */; };
 		E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4B69E1D0A3A1BDC003C02F2 /* main.cpp */; };
 		E4B69E210A3A1BDC003C02F2 /* ofApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */; };
@@ -51,6 +52,8 @@
 		C17D686F1CD2B84C00AFE2FB /* json.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = json.h; sourceTree = "<group>"; };
 		C17D68711CD2B84C00AFE2FB /* jsoncpp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = jsoncpp.cpp; sourceTree = "<group>"; };
 		C17F364E1CD313D300EBE43C /* data */ = {isa = PBXFileReference; lastKnownFileType = folder; name = data; path = bin/data; sourceTree = "<group>"; };
+		C1ACEBDF1CD3AB38003F16DC /* ofxThreadedImageLoader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ofxThreadedImageLoader.cpp; sourceTree = "<group>"; };
+		C1ACEBE01CD3AB38003F16DC /* ofxThreadedImageLoader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ofxThreadedImageLoader.h; sourceTree = "<group>"; };
 		E4328143138ABC890047C5CB /* openFrameworksLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = openFrameworksLib.xcodeproj; path = ../../../libs/openFrameworksCompiled/project/osx/openFrameworksLib.xcodeproj; sourceTree = SOURCE_ROOT; };
 		E4B69B5B0A3A1756003C02F2 /* helen1Debug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = helen1Debug.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4B69E1D0A3A1BDC003C02F2 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
@@ -84,6 +87,7 @@
 			isa = PBXGroup;
 			children = (
 				C17D68651CD2B84C00AFE2FB /* ofxJSON */,
+				C1ACEBDD1CD3AB38003F16DC /* ofxThreadedImageLoader */,
 			);
 			name = addons;
 			sourceTree = "<group>";
@@ -149,6 +153,24 @@
 				C17D68711CD2B84C00AFE2FB /* jsoncpp.cpp */,
 			);
 			path = src;
+			sourceTree = "<group>";
+		};
+		C1ACEBDD1CD3AB38003F16DC /* ofxThreadedImageLoader */ = {
+			isa = PBXGroup;
+			children = (
+				C1ACEBDE1CD3AB38003F16DC /* src */,
+			);
+			name = ofxThreadedImageLoader;
+			sourceTree = "<group>";
+		};
+		C1ACEBDE1CD3AB38003F16DC /* src */ = {
+			isa = PBXGroup;
+			children = (
+				C1ACEBDF1CD3AB38003F16DC /* ofxThreadedImageLoader.cpp */,
+				C1ACEBE01CD3AB38003F16DC /* ofxThreadedImageLoader.h */,
+			);
+			name = src;
+			path = ../../../addons/ofxThreadedImageLoader/src;
 			sourceTree = "<group>";
 		};
 		E4328144138ABC890047C5CB /* Products */ = {
@@ -279,6 +301,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C1ACEBE11CD3AB38003F16DC /* ofxThreadedImageLoader.cpp in Sources */,
 				E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */,
 				C17D68731CD2B84C00AFE2FB /* jsoncpp.cpp in Sources */,
 				E4B69E210A3A1BDC003C02F2 /* ofApp.cpp in Sources */,

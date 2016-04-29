@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxJSON.h"
+#include "ofxThreadedImageLoader.h"
 
 class ofApp : public ofBaseApp{
 
@@ -45,6 +46,7 @@ class ofApp : public ofBaseApp{
     ofShader avg;
     ofMesh screen;
     ofFbo canvas;
+    ofxThreadedImageLoader imageLoader;
   
     const int imageCount = 10;
   
