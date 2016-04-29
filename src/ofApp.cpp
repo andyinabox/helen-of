@@ -16,43 +16,9 @@ void ofApp::setup(){
   // load images and allocate fbos
   for(int i = 0; i < imageCount; i++) {
     addHelenFbo(data[i]);
-//    ofImage img;
-//    img.load(getImagePath(data[i]));
-//    img.update();
-//    images.push_back(img);
-//    
-//    ofFbo fbo;
-//    fbo.allocate(ofGetWidth(), ofGetHeight());
-//    fbo.begin();
-//      ofClear(0);
-//    fbo.end();
-//    fbos.push_back(fbo);
+    currentIndex = i;
   }
-  
-//  float baseImgWidth;
-//  float baseImgHeight;
-//  float scale;
-  
-  // draw to fps
-  for(int i = 0; i < imageCount; i++) {
-//    fbos[i].begin();
-//      ofPushMatrix();
-//        baseImgWidth = data[i][0][1].asFloat();
-//        baseImgHeight = data[i][0][2].asFloat();
-//        scale = ofGetHeight() / baseImgHeight;
-//    
-//        ofTranslate((ofGetWidth()-(baseImgWidth*scale))/2, 0);
-//        ofScale(scale, scale);
-//        images[i].draw(0, 0);
-//      
-//        // draw face points
-//        for(auto p : data[i][1]) {
-//          ofDrawCircle(p[0].asFloat(), p[1].asFloat(), 2/scale);
-//        }
-//      ofPopMatrix();
-//    fbos[i].end();
-    drawHelenFbo(i);
-  }
+
 
   // load shader
   avg.load("shaders/avg");
@@ -76,8 +42,8 @@ void ofApp::setup(){
 
 //------------------------------------------------facePoints--------------
 void ofApp::update(){
-
-
+  addHelenFbo(data[currentIndex]);
+  currentIndex++;
 }
 
 //--------------------------------------------------------------
@@ -94,7 +60,7 @@ void ofApp::draw(){
         ofMap(mouseY, 0, ofGetHeight(), -1, 1, true)
     );
   
-    for(int i = 0; i < imageCount; i++) {
+    for(int i = 0; i < fbos.size(); i++) {
       string texName = "tex"+ofToString(i);
       avg.setUniformTexture(texName, fbos[i].getTexture(0), i);
     }
@@ -115,26 +81,25 @@ void ofApp::addHelenFbo(ofxJSONElement item) {
     
     ofFbo fbo;
     fbo.allocate(ofGetWidth(), ofGetHeight());
-    fbo.begin();
-      ofClear(0);
-    fbo.end();
     fbos.push_back(fbo);
   
     if(images.size() > imageCount) {
       images.erase(images.begin());
       fbos.erase(fbos.begin());
     }
-
+  
+    drawHelenFbo(item, images.size()-1);
 }
 
-void ofApp::drawHelenFbo(int index) {
+void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
 
-  float baseImgWidth = data[index][0][1].asFloat();
-  float baseImgHeight = data[index][0][2].asFloat();
+  float baseImgWidth = item[0][1].asFloat();
+  float baseImgHeight = item[0][2].asFloat();
   float scale = ofGetHeight() / baseImgHeight;
-  ofxJSONElement annotations = data[index][1];
+  ofxJSONElement annotations = item[1];
 
   fbos[index].begin();
+    ofClear(0);
     ofPushMatrix();
       ofTranslate((ofGetWidth()-(baseImgWidth*scale))/2, 0);
       ofScale(scale, scale);

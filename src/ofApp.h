@@ -11,7 +11,7 @@ class ofApp : public ofBaseApp{
 		void draw();
   
     void addHelenFbo(ofxJSONElement item);
-    void drawHelenFbo(int index);
+    void drawHelenFbo(ofxJSONElement item, int index);
   
     string getImagePath(ofxJSONElement item);
     string getSharedPath(string path);
