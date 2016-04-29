@@ -42,6 +42,9 @@ class ofApp : public ofBaseApp{
   
     ofxPanel gui;
     ofxFloatSlider faceAlign;
+    ofxToggle fboAnnotations;
+    ofxFloatSlider annotationSize;
+    ofxFloatSlider avgDisplacement;
   
     ofxJSONElement data;
     ofxJSONElement current;

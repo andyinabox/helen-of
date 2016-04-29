@@ -9,6 +9,10 @@ void ofApp::setup(){
 
   gui.setup();
   gui.add(faceAlign.setup("Face align", 1.0, 0.0, 1.0));
+  gui.add(fboAnnotations.setup("FBO annotations", false));
+  gui.add(annotationSize.setup("Annotation size", 1.0, 1.0, 10.0));
+  gui.add(avgDisplacement.setup("Displacement", 0.3, 0.0, 10.0));
+
 
   bool parsingSuccessful = data.open("../../../shared/annotations.json");
   
@@ -58,7 +62,7 @@ void ofApp::update(){
   canvas.begin();
     avg.begin();
     
-      avg.setUniform1f("dMultiply", 0.3);
+      avg.setUniform1f("dMultiply", avgDisplacement);
       avg.setUniform2f("direction",
           ofMap(mouseX, 0, ofApp::getWidth(), -1, 1, true),
           ofMap(mouseY, 0, ofApp::getHeight(), -1, 1, true)
@@ -153,16 +157,20 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
   );
   float area = (leftEyeCentroid.distance(rightEyeCentroid) + leftEyeCentroid.distance(mouthCentroid) + mouthCentroid.distance(rightEyeCentroid)) / 2;
 
+  float interpolate = faceAlign;
+//  float interpolate = (index+1)/imageCount;
+
 //  float scale = ofApp::getHeight() / baseImgHeight;
 
-  float scale = 200 / area;
+  float centeredScale = 200 / area;
+  float scale = ofLerp(1.0, centeredScale, interpolate);
   
-  ofVec2f defaultTranslation = ofVec2f((ofApp::getWidth()-(baseImgWidth*scale))/2, 0);
+  ofVec2f defaultTranslation = ofVec2f((ofApp::getWidth()-(baseImgWidth*scale))/2, (ofApp::getHeight()-(baseImgHeight*scale))/2);
   ofVec2f centeredTranslation =  ofVec2f(
     ofApp::getWidth()/2 - faceCentroid.x*scale,
     ofApp::getHeight()/3 - faceCentroid.y*scale
   );
-  ofVec2f faceTranslation = defaultTranslation.getInterpolated(centeredTranslation, faceAlign);
+  ofVec2f faceTranslation = defaultTranslation.getInterpolated(centeredTranslation, interpolate);
 
   fbos[index].begin();
     ofClear(0);
@@ -177,8 +185,12 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
       images[index].draw(0, 0);
     
       // draw face points
-      for(auto p : annotations) {
-        ofDrawCircle(p[0].asFloat(), p[1].asFloat(), 2/scale);
+      if(fboAnnotations) {
+        for(auto p : annotations) {
+          ofPushStyle();
+            ofDrawCircle(p[0].asFloat(), p[1].asFloat(), annotationSize/scale);
+          ofPopStyle();
+        }
       }
   
 //      ofSetColor(0, 0, 255);
