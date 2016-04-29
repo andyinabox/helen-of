@@ -9,10 +9,9 @@ void ofApp::setup(){
 
   gui.setup();
   gui.add(faceAlign.setup("Face align", 1.0, 0.0, 1.0));
-  gui.add(fboAnnotations.setup("FBO annotations", false));
-  gui.add(annotationSize.setup("Annotation size", 1.0, 1.0, 10.0));
+  gui.add(annotationSize.setup("Annotation size", 2.0, 0.0, 10.0));
   gui.add(avgDisplacement.setup("Displacement", 0.3, 0.0, 10.0));
-
+  displacementDirection = ofVec2f(0, 0);
 
   bool parsingSuccessful = data.open("../../../shared/annotations.json");
   
@@ -63,11 +62,11 @@ void ofApp::update(){
     avg.begin();
     
       avg.setUniform1f("dMultiply", avgDisplacement);
-      avg.setUniform2f("direction",
-          ofMap(mouseX, 0, ofApp::getWidth(), -1, 1, true),
-          ofMap(mouseY, 0, ofApp::getHeight(), -1, 1, true)
-      );
-    
+//      avg.setUniform2f("direction",
+//          ofMap(mouseX, 0, ofApp::getWidth(), -1, 1, true),
+//          ofMap(mouseY, 0, ofApp::getHeight(), -1, 1, true)
+//      );
+      avg.setUniform2f("direction", displacementDirection);
       for(int i = 0; i < fbos.size(); i++) {
         string texName = "tex"+ofToString(i);
         avg.setUniformTexture(texName, fbos[i].getTexture(0), i);
@@ -155,6 +154,9 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
     (leftEyeCentroid.x + rightEyeCentroid.x + mouthCentroid.x)/3,
     (leftEyeCentroid.y + rightEyeCentroid.y + mouthCentroid.y)/3
   );
+  
+
+  
   float area = (leftEyeCentroid.distance(rightEyeCentroid) + leftEyeCentroid.distance(mouthCentroid) + mouthCentroid.distance(rightEyeCentroid)) / 2;
 
   float interpolate = faceAlign;
@@ -164,6 +166,11 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
 
   float centeredScale = 200 / area;
   float scale = ofLerp(1.0, centeredScale, interpolate);
+
+  displacementDirection = ofVec2f(
+    ofMap((ofApp::getWidth()/2 - faceCentroid.x*scale), 0, ofApp::getWidth()/2, -1, 1, true),
+    ofMap((ofApp::getHeight()/2 - faceCentroid.y*scale), 0, ofApp::getHeight()/2, -1, 1, true)
+  );
   
   ofVec2f defaultTranslation = ofVec2f((ofApp::getWidth()-(baseImgWidth*scale))/2, (ofApp::getHeight()-(baseImgHeight*scale))/2);
   ofVec2f centeredTranslation =  ofVec2f(
@@ -185,7 +192,7 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
       images[index].draw(0, 0);
     
       // draw face points
-      if(fboAnnotations) {
+      if(annotationSize > 0) {
         for(auto p : annotations) {
           ofPushStyle();
             ofDrawCircle(p[0].asFloat(), p[1].asFloat(), annotationSize/scale);
