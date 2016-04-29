@@ -10,6 +10,9 @@ class ofApp : public ofBaseApp{
 		void update();
 		void draw();
   
+    void addHelenFbo(ofxJSONElement item);
+    void drawHelenFbo(int index);
+  
     string getImagePath(ofxJSONElement item);
     string getSharedPath(string path);
 
