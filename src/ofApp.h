@@ -25,10 +25,12 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 		
+  
     ofxJSONElement data;
     ofxJSONElement current;
-    vector<ofVec2f> facePoints;
-    ofImage img;
-    ofFbo transformFbo;
+    vector<ofImage> images;
+    vector<ofFbo> fbos;
+    ofShader avg;
   
+    const int imageCount = 10;
 };

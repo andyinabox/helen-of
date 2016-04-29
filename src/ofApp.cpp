@@ -10,44 +10,69 @@ void ofApp::setup(){
     ofLogNotice() << "Failed parsing";
   }
   
-  current = data[0];
+  // load images and allocate fbos
+  for(int i = 0; i < imageCount; i++) {
+    ofImage img;
+    img.load(getImagePath(data[i]));
+    img.update();
+    images.push_back(img);
+    
+    ofFbo fbo;
+    fbo.allocate(ofGetWidth(), ofGetHeight());
+    fbo.begin();
+      ofClear(0);
+    fbo.end();
+    fbos.push_back(fbo);
+  }
   
-  img.load(getImagePath(current));
-  img.update();
-
-  for(auto p : current[1]) {
-    facePoints.push_back(ofVec2f(p[0].asFloat(), p[1].asFloat()));
+  // draw to fps
+  for(int i = 0; i < imageCount; i++) {
+    fbos[i].begin();
+      ofPushMatrix();
+        float scale = ofGetHeight() / data[i][0][2].asFloat();
+        ofTranslate(data[i][0][1].asFloat()/2, data[i][0][2].asFloat()/2);
+        ofScale(scale, scale);
+        images[i].draw(0, 0);
+      
+        // draw face points
+        for(auto p : data[i][1]) {
+          ofDrawCircle(p[0].asFloat(), p[1].asFloat(), 3);
+        }
+      ofPopMatrix();
+    fbos[i].end();
   }
 
-  transformFbo.allocate(ofGetWidth(), ofGetHeight());
-  transformFbo.begin();
-    ofClear(0);
-  transformFbo.end();
-  
+  // load shader
+  avg.load("shaders/avg");
 
 }
 
 //------------------------------------------------facePoints--------------
 void ofApp::update(){
-  transformFbo.begin();
-    ofPushMatrix();
-      float scale = ofGetHeight() / current[0][2].asFloat();
-      ofScale(scale, scale);
-      ofRotate(5);
-      img.draw(0, 0);
-    
-      // draw face points
-      for(ofVec2f p : facePoints) {
-        ofDrawCircle(p.x, p.y, 3);
-      }
-    ofPopMatrix();
-  transformFbo.end();
+
+
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
   ofClear(0);
-  transformFbo.draw(0, 0);
+  
+  avg.begin();
+  
+    avg.setUniform1f("dMultiply", 0.3);
+    avg.setUniform2f("direction",
+        ofMap(mouseX, 0, ofGetWidth(), -1, 1, true),
+        ofMap(mouseY, 0, ofGetHeight(), -1, 1, true)
+    );
+  
+    for(int i = 0; i < imageCount; i++) {
+      string texName = "tex"+ofToString(i);
+      avg.setUniformTexture(texName, fbos[i].getTexture(0), i);
+    }
+
+    images[0].draw(0, 0, ofGetWidth(), ofGetHeight());
+//    ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+  avg.end();
 }
 
 
