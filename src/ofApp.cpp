@@ -19,25 +19,35 @@ void ofApp::setup(){
     facePoints.push_back(ofVec2f(p[0].asFloat(), p[1].asFloat()));
   }
 
+  transformFbo.allocate(ofGetWidth(), ofGetHeight());
+  transformFbo.begin();
+    ofClear(0);
+  transformFbo.end();
+  
+
 }
 
 //------------------------------------------------facePoints--------------
 void ofApp::update(){
+  transformFbo.begin();
+    ofPushMatrix();
+      float scale = ofGetHeight() / current[0][2].asFloat();
+      ofScale(scale, scale);
+      ofRotate(5);
+      img.draw(0, 0);
+    
+      // draw face points
+      for(ofVec2f p : facePoints) {
+        ofDrawCircle(p.x, p.y, 3);
+      }
+    ofPopMatrix();
+  transformFbo.end();
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-
-  ofPushMatrix();
-    float scale = ofGetHeight() / current[0][2].asFloat();
-    ofScale(scale, scale);
-    img.draw(0, 0);
-  
-    // draw face points
-    for(ofVec2f p : facePoints) {
-      ofDrawCircle(p.x, p.y, 3);
-    }
-  ofPopMatrix();
+  ofClear(0);
+  transformFbo.draw(0, 0);
 }
 
 

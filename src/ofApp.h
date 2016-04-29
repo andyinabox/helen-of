@@ -29,5 +29,6 @@ class ofApp : public ofBaseApp{
     ofxJSONElement current;
     vector<ofVec2f> facePoints;
     ofImage img;
+    ofFbo transformFbo;
   
 };
