@@ -60,18 +60,18 @@ void ofApp::update(){
   
   canvas.begin();
     avg.begin();
-    
+  
+      // set standard uniforms
       avg.setUniform1f("dMultiply", avgDisplacement);
-//      avg.setUniform2f("direction",
-//          ofMap(mouseX, 0, ofApp::getWidth(), -1, 1, true),
-//          ofMap(mouseY, 0, ofApp::getHeight(), -1, 1, true)
-//      );
       avg.setUniform2f("direction", displacementDirection);
+  
+      // set texture uniforms
       for(int i = 0; i < fbos.size(); i++) {
         string texName = "tex"+ofToString(i);
         avg.setUniformTexture(texName, fbos[i].getTexture(0), i);
       }
-    
+  
+      // draw empty screen
       screen.draw();
     
     avg.end();
@@ -160,10 +160,6 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
   float area = (leftEyeCentroid.distance(rightEyeCentroid) + leftEyeCentroid.distance(mouthCentroid) + mouthCentroid.distance(rightEyeCentroid)) / 2;
 
   float interpolate = faceAlign;
-//  float interpolate = (index+1)/imageCount;
-
-//  float scale = ofApp::getHeight() / baseImgHeight;
-
   float centeredScale = 200 / area;
   float scale = ofLerp(1.0, centeredScale, interpolate);
 
@@ -182,11 +178,6 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
   fbos[index].begin();
     ofClear(0);
     ofPushMatrix();
-//      ofTranslate((ofApp::getWidth()-(baseImgWidth*scale))/2, 0);
-//      ofTranslate(
-//        ofApp::getWidth()/2 - faceCentroid.x*scale,
-//        ofApp::getHeight()/2 - faceCentroid.y*scale
-//      );
       ofTranslate(faceTranslation.x, faceTranslation.y);
       ofScale(scale, scale);
       images[index].draw(0, 0);
@@ -200,11 +191,6 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
         }
       }
   
-//      ofSetColor(0, 0, 255);
-//      ofDrawCircle(leftEyeCentroid.x, leftEyeCentroid.y, 5);
-//      ofDrawCircle(rightEyeCentroid.x, rightEyeCentroid.y, 5);
-//      ofDrawCircle(mouthCentroid.x, mouthCentroid.y, 5);
-//      ofDrawCircle(faceCentroid.x, faceCentroid.y, 10/scale);
     ofPopMatrix();
   fbos[index].end();
 }
