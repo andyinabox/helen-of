@@ -25,12 +25,19 @@ void ofApp::setup(){
     fbos.push_back(fbo);
   }
   
+  float baseImgWidth;
+  float baseImgHeight;
+  float scale;
+  
   // draw to fps
   for(int i = 0; i < imageCount; i++) {
     fbos[i].begin();
       ofPushMatrix();
-        float scale = ofGetHeight() / data[i][0][2].asFloat();
-        ofTranslate(data[i][0][1].asFloat()/2, data[i][0][2].asFloat()/2);
+        baseImgWidth = data[i][0][1].asFloat();
+        baseImgHeight = data[i][0][2].asFloat();
+        scale = ofGetHeight() / baseImgHeight;
+    
+        ofTranslate((ofGetWidth()-(baseImgWidth*scale))/2, 0);
         ofScale(scale, scale);
         images[i].draw(0, 0);
       
@@ -56,6 +63,8 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
   ofClear(0);
+  
+//  fbos[currentIndex].draw(0, 0);
   
   avg.begin();
   
@@ -86,7 +95,12 @@ string ofApp::getSharedPath(string path) {
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-
+  if(key == ' ') {
+    currentIndex++;
+    if(currentIndex >= imageCount) {
+      currentIndex = 0;
+    }
+  }
 }
 
 //--------------------------------------------------------------
