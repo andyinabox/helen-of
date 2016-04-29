@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxJSON.h"
+#include "ofxGui.h"
 
 class ofApp : public ofBaseApp{
 
@@ -38,6 +39,9 @@ class ofApp : public ofBaseApp{
 		
     bool playing = false;
     int currentIndex = 0;
+  
+    ofxPanel gui;
+    ofxFloatSlider faceAlign;
   
     ofxJSONElement data;
     ofxJSONElement current;

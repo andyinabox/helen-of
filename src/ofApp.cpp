@@ -7,6 +7,9 @@ void ofApp::setup(){
 
   canvas.allocate(ofGetHeight()*0.75, ofGetHeight());
 
+  gui.setup();
+  gui.add(faceAlign.setup("Face align", 1.0, 0.0, 1.0));
+
   bool parsingSuccessful = data.open("../../../shared/annotations.json");
   
   if(parsingSuccessful) {
@@ -16,9 +19,8 @@ void ofApp::setup(){
   }
   
   // load images and allocate fbos
-  for(int i = 0; i < imageCount; i++) {
-    addHelenFbo(data[i]);
-    currentIndex = i;
+  for(currentIndex; currentIndex < imageCount; currentIndex++) {
+    addHelenFbo(data[currentIndex]);
   }
 
 
@@ -48,6 +50,10 @@ void ofApp::update(){
   if(playing) {
     next();
   }
+
+  for(int i = 0; i < fbos.size(); i++) {
+    drawHelenFbo( data[currentIndex-(imageCount)+i], i);
+  }
   
   canvas.begin();
     avg.begin();
@@ -66,7 +72,9 @@ void ofApp::update(){
       screen.draw();
     
     avg.end();
-  
+
+//    fbos[0].draw(0, 0);
+
   canvas.end();
 }
 
@@ -78,7 +86,8 @@ void ofApp::draw(){
       ofTranslate((ofGetWidth()-ofApp::getWidth())/2, 0);
       canvas.draw(0, 0);
     ofPopMatrix();
-
+  
+  gui.draw();
 }
 
 void ofApp::next() {
@@ -147,15 +156,23 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
 //  float scale = ofApp::getHeight() / baseImgHeight;
 
   float scale = 200 / area;
+  
+  ofVec2f defaultTranslation = ofVec2f((ofApp::getWidth()-(baseImgWidth*scale))/2, 0);
+  ofVec2f centeredTranslation =  ofVec2f(
+    ofApp::getWidth()/2 - faceCentroid.x*scale,
+    ofApp::getHeight()/3 - faceCentroid.y*scale
+  );
+  ofVec2f faceTranslation = defaultTranslation.getInterpolated(centeredTranslation, faceAlign);
 
   fbos[index].begin();
     ofClear(0);
     ofPushMatrix();
 //      ofTranslate((ofApp::getWidth()-(baseImgWidth*scale))/2, 0);
-      ofTranslate(
-        ofApp::getWidth()/2 - faceCentroid.x*scale,
-        ofApp::getHeight()/2 - faceCentroid.y*scale
-      );
+//      ofTranslate(
+//        ofApp::getWidth()/2 - faceCentroid.x*scale,
+//        ofApp::getHeight()/2 - faceCentroid.y*scale
+//      );
+      ofTranslate(faceTranslation.x, faceTranslation.y);
       ofScale(scale, scale);
       images[index].draw(0, 0);
     
@@ -164,7 +181,7 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
         ofDrawCircle(p[0].asFloat(), p[1].asFloat(), 2/scale);
       }
   
-      ofSetColor(0, 0, 255);
+//      ofSetColor(0, 0, 255);
 //      ofDrawCircle(leftEyeCentroid.x, leftEyeCentroid.y, 5);
 //      ofDrawCircle(rightEyeCentroid.x, rightEyeCentroid.y, 5);
 //      ofDrawCircle(mouthCentroid.x, mouthCentroid.y, 5);
