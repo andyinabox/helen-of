@@ -30,22 +30,7 @@ void ofApp::setup(){
   // load shader
   avg.load("shaders/avg");
   
-  // setup screen
-  screen.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
-  screen.addVertex(ofVec3f(0, 0, 0));
-  screen.addVertex(ofVec3f(ofApp::getWidth(), 0, 0));
-  screen.addVertex(ofVec3f(ofApp::getWidth(), ofApp::getHeight(), 0));
-  screen.addVertex(ofVec3f(0, ofApp::getHeight(), 0));
-  screen.addIndex(0);
-  screen.addIndex(1);
-  screen.addIndex(2);
-  screen.addIndex(3);
-  screen.addTexCoord(ofVec2f(0, 0));
-  screen.addTexCoord(ofVec2f(ofApp::getWidth(), 0));
-  screen.addTexCoord(ofVec2f(ofApp::getWidth(), ofApp::getHeight()));
-  screen.addTexCoord(ofVec2f(0, ofApp::getHeight()));
-
-
+  screen.setup(ofApp::getWidth(), ofApp::getHeight());
 }
 
 //------------------------------------------------facePoints--------------

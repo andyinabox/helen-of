@@ -4,6 +4,8 @@
 #include "ofxJSON.h"
 #include "ofxGui.h"
 
+#include "ShaderScreen.h"
+
 class ofApp : public ofBaseApp{
 
 	public:
@@ -51,7 +53,7 @@ class ofApp : public ofBaseApp{
     vector<ofImage> images;
     vector<ofFbo> fbos;
     ofShader avg;
-    ofMesh screen;
+    ShaderScreen screen;
     ofFbo canvas;
   
     const int imageCount = 10;
