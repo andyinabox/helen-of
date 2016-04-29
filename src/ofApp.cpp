@@ -62,8 +62,8 @@ void ofApp::update(){
     avg.begin();
   
       // set standard uniforms
-      avg.setUniform1f("dMultiply", avgDisplacement);
-      avg.setUniform2f("direction", displacementDirection);
+      avg.setUniform1f("u_displacement", avgDisplacement);
+      avg.setUniform2f("u_direction", displacementDirection);
   
       // set texture uniforms
       for(int i = 0; i < fbos.size(); i++) {

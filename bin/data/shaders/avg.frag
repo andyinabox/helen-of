@@ -16,12 +16,10 @@ uniform sampler2DRect tex7;
 uniform sampler2DRect tex8;
 uniform sampler2DRect tex9;
 
-uniform float dMultiply;
-uniform vec2 direction;
+uniform float u_displacement;
+uniform vec2 u_direction;
 
 varying vec2 texCoordVarying;
-
-
 
 vec2 updateSt(in vec2 st, in vec4 last, in vec2 dir, in float amount) {
     return(st + vec2( (last.x + dir.x) * amount, (last.z + dir.y) * amount));
@@ -50,23 +48,23 @@ void main()
 
 
     vec4 texel0 = texture2DRect(tex0, st);
-    st = updateSt(st, texel0, direction, 1.0*dMultiply);
+    st = updateSt(st, texel0, u_direction, 1.0*u_displacement);
     vec4 texel1 = texture2DRect(tex1, st);
-    st = updateSt(st, texel1, direction,2.0*dMultiply);
+    st = updateSt(st, texel1, u_direction,2.0*u_displacement);
     vec4 texel2 = texture2DRect(tex2, st);
-    st = updateSt(st, texel2, direction,3.0*dMultiply);
+    st = updateSt(st, texel2, u_direction,3.0*u_displacement);
     vec4 texel3 = texture2DRect(tex3, st);
-    st = updateSt(st, texel3, direction,4.0*dMultiply);
+    st = updateSt(st, texel3, u_direction,4.0*u_displacement);
     vec4 texel4 = texture2DRect(tex4, st);
-    st = updateSt(st, texel4, direction,5.0*dMultiply);
+    st = updateSt(st, texel4, u_direction,5.0*u_displacement);
     vec4 texel5 = texture2DRect(tex5, st);
-    st = updateSt(st, texel5, direction,6.0*dMultiply);
+    st = updateSt(st, texel5, u_direction,6.0*u_displacement);
     vec4 texel6 = texture2DRect(tex6, st);
-    st = updateSt(st, texel6, direction,7.0*dMultiply);
+    st = updateSt(st, texel6, u_direction,7.0*u_displacement);
     vec4 texel7 = texture2DRect(tex7, st);
-    st = updateSt(st, texel7, direction,8.0*dMultiply);
+    st = updateSt(st, texel7, u_direction,8.0*u_displacement);
     vec4 texel8 = texture2DRect(tex8, st);
-    st = updateSt(st, texel8, direction,9.0*dMultiply);
+    st = updateSt(st, texel8, u_direction,9.0*u_displacement);
 //    vec4 texel9 = texture2DRect(tex9, st);
     
     
