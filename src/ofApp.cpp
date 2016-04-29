@@ -1,7 +1,10 @@
 #include "ofApp.h"
 
 //--------------------------------------------------------------
-void ofApp::setup(){  
+void ofApp::setup(){
+  ofSetVerticalSync(true);
+  ofSetFullscreen(true);
+
   bool parsingSuccessful = data.open("../../../shared/annotations.json");
   
   if(parsingSuccessful) {
@@ -43,7 +46,7 @@ void ofApp::setup(){
       
         // draw face points
         for(auto p : data[i][1]) {
-          ofDrawCircle(p[0].asFloat(), p[1].asFloat(), 3);
+          ofDrawCircle(p[0].asFloat(), p[1].asFloat(), 2/scale);
         }
       ofPopMatrix();
     fbos[i].end();
@@ -51,6 +54,21 @@ void ofApp::setup(){
 
   // load shader
   avg.load("shaders/avg");
+  
+  // setup screen
+  screen.setMode(OF_PRIMITIVE_TRIANGLE_FAN);
+  screen.addVertex(ofVec3f(0, 0, 0));
+  screen.addVertex(ofVec3f(ofGetWidth(), 0, 0));
+  screen.addVertex(ofVec3f(ofGetWidth(), ofGetHeight(), 0));
+  screen.addVertex(ofVec3f(0, ofGetHeight(), 0));
+  screen.addIndex(0);
+  screen.addIndex(1);
+  screen.addIndex(2);
+  screen.addIndex(3);
+  screen.addTexCoord(ofVec2f(0, 0));
+  screen.addTexCoord(ofVec2f(ofGetWidth(), 0));
+  screen.addTexCoord(ofVec2f(ofGetWidth(), ofGetHeight()));
+  screen.addTexCoord(ofVec2f(0, ofGetHeight()));
 
 }
 
@@ -78,10 +96,12 @@ void ofApp::draw(){
       string texName = "tex"+ofToString(i);
       avg.setUniformTexture(texName, fbos[i].getTexture(0), i);
     }
-
-    images[0].draw(0, 0, ofGetWidth(), ofGetHeight());
-//    ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+  
+    screen.draw();
+  
   avg.end();
+
+  
 }
 
 

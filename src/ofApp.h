@@ -32,6 +32,7 @@ class ofApp : public ofBaseApp{
     vector<ofImage> images;
     vector<ofFbo> fbos;
     ofShader avg;
+    ofMesh screen;
   
     const int imageCount = 10;
   
