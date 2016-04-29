@@ -10,7 +10,14 @@ class ofApp : public ofBaseApp{
 		void update();
 		void draw();
   
-    void addHelenFbo(ofxJSONElement item);
+    void next();
+  
+    float getWidth();
+    float getHeight();
+  
+    void addHelenFbo(ofxJSONElement item, bool draw=true);
+  
+    void pushHelenFbo(ofxJSONElement item, bool draw=true);
     void drawHelenFbo(ofxJSONElement item, int index);
   
     string getImagePath(ofxJSONElement item);
@@ -28,6 +35,7 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 		
+    bool playing = false;
     int currentIndex = 0;
   
     ofxJSONElement data;
@@ -36,6 +44,7 @@ class ofApp : public ofBaseApp{
     vector<ofFbo> fbos;
     ofShader avg;
     ofMesh screen;
+    ofFbo canvas;
   
     const int imageCount = 10;
   
