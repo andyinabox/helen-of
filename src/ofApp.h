@@ -26,6 +26,8 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
 		
     ofxJSONElement data;
+    ofxJSONElement current;
+    vector<ofVec2f> facePoints;
     ofImage img;
   
 };

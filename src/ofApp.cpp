@@ -10,18 +10,34 @@ void ofApp::setup(){
     ofLogNotice() << "Failed parsing";
   }
   
+  current = data[0];
   
-  img.load(getImagePath(data[0]));
+  img.load(getImagePath(current));
+  img.update();
+
+  for(auto p : current[1]) {
+    facePoints.push_back(ofVec2f(p[0].asFloat(), p[1].asFloat()));
+  }
+
 }
 
-//--------------------------------------------------------------
+//------------------------------------------------facePoints--------------
 void ofApp::update(){
-  img.update();
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-  img.draw(0, 0);
+
+  ofPushMatrix();
+    float scale = ofGetHeight() / current[0][2].asFloat();
+    ofScale(scale, scale);
+    img.draw(0, 0);
+  
+    // draw face points
+    for(ofVec2f p : facePoints) {
+      ofDrawCircle(p.x, p.y, 3);
+    }
+  ofPopMatrix();
 }
 
 
