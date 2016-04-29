@@ -22,6 +22,7 @@ class ofApp : public ofBaseApp{
   
     string getImagePath(ofxJSONElement item);
     string getSharedPath(string path);
+    ofVec2f getCentroid(ofxJSONElement annotations, int start, int end);
 
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -47,5 +48,10 @@ class ofApp : public ofBaseApp{
     ofFbo canvas;
   
     const int imageCount = 10;
-  
+    const int RIGHT_EYE_START = 114;
+    const int RIGHT_EYE_END = 133;
+    const int LEFT_EYE_START = 134;
+    const int LEFT_EYE_END = 153;
+    const int MOUTH_OUTLINE_START = 58;
+    const int MOUTH_OUTLINE_END = 85;
 };

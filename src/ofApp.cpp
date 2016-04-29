@@ -66,6 +66,7 @@ void ofApp::update(){
       screen.draw();
     
     avg.end();
+  
   canvas.end();
 }
 
@@ -73,10 +74,11 @@ void ofApp::update(){
 void ofApp::draw(){
   ofClear(0);
   
-  ofPushMatrix();
-    ofTranslate((ofGetWidth()-ofApp::getWidth())/2, 0);
-    canvas.draw(0, 0);
-  ofPopMatrix();
+    ofPushMatrix();
+      ofTranslate((ofGetWidth()-ofApp::getWidth())/2, 0);
+      canvas.draw(0, 0);
+    ofPopMatrix();
+
 }
 
 void ofApp::next() {
@@ -132,13 +134,28 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
 
   float baseImgWidth = item[0][1].asFloat();
   float baseImgHeight = item[0][2].asFloat();
-  float scale = ofApp::getHeight() / baseImgHeight;
   ofxJSONElement annotations = item[1];
+  ofVec2f leftEyeCentroid = getCentroid(annotations, LEFT_EYE_START, LEFT_EYE_END);
+  ofVec2f rightEyeCentroid = getCentroid(annotations, RIGHT_EYE_START, RIGHT_EYE_END);
+  ofVec2f mouthCentroid = getCentroid(annotations, MOUTH_OUTLINE_START, MOUTH_OUTLINE_END);
+  ofVec2f faceCentroid = ofVec2f(
+    (leftEyeCentroid.x + rightEyeCentroid.x + mouthCentroid.x)/3,
+    (leftEyeCentroid.y + rightEyeCentroid.y + mouthCentroid.y)/3
+  );
+  float area = (leftEyeCentroid.distance(rightEyeCentroid) + leftEyeCentroid.distance(mouthCentroid) + mouthCentroid.distance(rightEyeCentroid)) / 2;
+
+//  float scale = ofApp::getHeight() / baseImgHeight;
+
+  float scale = 200 / area;
 
   fbos[index].begin();
     ofClear(0);
     ofPushMatrix();
-      ofTranslate((ofApp::getWidth()-(baseImgWidth*scale))/2, 0);
+//      ofTranslate((ofApp::getWidth()-(baseImgWidth*scale))/2, 0);
+      ofTranslate(
+        ofApp::getWidth()/2 - faceCentroid.x*scale,
+        ofApp::getHeight()/2 - faceCentroid.y*scale
+      );
       ofScale(scale, scale);
       images[index].draw(0, 0);
     
@@ -146,6 +163,12 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
       for(auto p : annotations) {
         ofDrawCircle(p[0].asFloat(), p[1].asFloat(), 2/scale);
       }
+  
+      ofSetColor(0, 0, 255);
+//      ofDrawCircle(leftEyeCentroid.x, leftEyeCentroid.y, 5);
+//      ofDrawCircle(rightEyeCentroid.x, rightEyeCentroid.y, 5);
+//      ofDrawCircle(mouthCentroid.x, mouthCentroid.y, 5);
+//      ofDrawCircle(faceCentroid.x, faceCentroid.y, 10/scale);
     ofPopMatrix();
   fbos[index].end();
 }
@@ -157,6 +180,19 @@ string ofApp::getImagePath(ofxJSONElement item) {
 
 string ofApp::getSharedPath(string path) {
   return ofFilePath::join("../../../shared/", path);
+}
+
+ofVec2f ofApp::getCentroid(ofxJSONElement annotations, int start, int end) {
+    float xt = 0;
+    float yt = 0;
+    int count = end - start;
+  
+    for(int i = start; i < end; i++) {
+      xt += annotations[i][0].asFloat();
+      yt += annotations[i][1].asFloat();
+    }
+  
+    return ofVec2f(xt/count, yt/count);
 }
 
 //--------------------------------------------------------------
