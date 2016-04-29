@@ -46,6 +46,7 @@ class ofApp : public ofBaseApp{
     ofxFloatSlider faceAlign;
     ofxFloatSlider annotationSize;
     ofxFloatSlider avgDisplacement;
+    ofxFloatSlider rotation;
     ofVec2f displacementDirection;
   
     ofxJSONElement data;

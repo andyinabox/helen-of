@@ -8,6 +8,7 @@ void ofApp::setup(){
   canvas.allocate(ofGetHeight()*0.75, ofGetHeight());
 
   gui.setup();
+  gui.add(rotation.setup("Rotation", 15.0, 0.0, 360.0));
   gui.add(faceAlign.setup("Face align", 1.0, 0.0, 1.0));
   gui.add(annotationSize.setup("Annotation size", 2.0, 0.0, 10.0));
   gui.add(avgDisplacement.setup("Displacement", 0.3, 0.0, 10.0));
@@ -44,6 +45,7 @@ void ofApp::update(){
   }
   
   canvas.begin();
+    ofClear(0);
     avg.begin();
   
       // set standard uniforms
@@ -140,7 +142,9 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
     (leftEyeCentroid.y + rightEyeCentroid.y + mouthCentroid.y)/3
   );
   
-
+  float eyesAngle = leftEyeCentroid.angle(rightEyeCentroid);
+  
+  ofLogNotice("ofApp::drawHelenFbo") << eyesAngle;
   
   float area = (leftEyeCentroid.distance(rightEyeCentroid) + leftEyeCentroid.distance(mouthCentroid) + mouthCentroid.distance(rightEyeCentroid)) / 2;
 
@@ -156,17 +160,22 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
   ofVec2f defaultTranslation = ofVec2f((ofApp::getWidth()-(baseImgWidth*scale))/2, (ofApp::getHeight()-(baseImgHeight*scale))/2);
   ofVec2f centeredTranslation =  ofVec2f(
     ofApp::getWidth()/2 - faceCentroid.x*scale,
-    ofApp::getHeight()/3 - faceCentroid.y*scale
+    ofApp::getHeight()/2 - faceCentroid.y*scale
   );
   ofVec2f faceTranslation = defaultTranslation.getInterpolated(centeredTranslation, interpolate);
 
   fbos[index].begin();
     ofClear(0);
+
     ofPushMatrix();
       ofTranslate(faceTranslation.x, faceTranslation.y);
       ofScale(scale, scale);
+
+      ofTranslate(faceCentroid.x, faceCentroid.y);
+      ofRotate(rotation, 0, 0, 1);
+      ofTranslate(-faceCentroid.x, -faceCentroid.y);
       images[index].draw(0, 0);
-    
+  
       // draw face points
       if(annotationSize > 0) {
         for(auto p : annotations) {
@@ -175,6 +184,10 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
           ofPopStyle();
         }
       }
+  
+      ofSetColor(0, 0, 255);
+      ofDrawLine(leftEyeCentroid.x, leftEyeCentroid.y, rightEyeCentroid.x, rightEyeCentroid.y);
+      ofDrawCircle(faceCentroid, 10/scale);
   
     ofPopMatrix();
   fbos[index].end();
