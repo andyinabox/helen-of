@@ -18,6 +18,7 @@ Todo
 ----
 
  - [x] Face rotation
+ - [ ] Add fader for multiple parameters in "zooming"
  - [ ] Add "crossfade" to avg shader
  - [ ] Slow it down! Or variable speed
  - [ ] Threaded image loading
