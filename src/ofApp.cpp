@@ -8,7 +8,7 @@ void ofApp::setup(){
   canvas.allocate(ofGetHeight()*0.75, ofGetHeight());
 
   gui.setup();
-  gui.add(rotation.setup("Rotation", 15.0, 0.0, 360.0));
+  gui.add(rotation.setup("Rotation", 15.0, -45.0, 45.0));
   gui.add(faceAlign.setup("Face align", 1.0, 0.0, 1.0));
   gui.add(annotationSize.setup("Annotation size", 2.0, 0.0, 10.0));
   gui.add(avgDisplacement.setup("Displacement", 0.3, 0.0, 10.0));
@@ -142,9 +142,10 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
     (leftEyeCentroid.y + rightEyeCentroid.y + mouthCentroid.y)/3
   );
   
-  float eyesAngle = leftEyeCentroid.angle(rightEyeCentroid);
-  
-  ofLogNotice("ofApp::drawHelenFbo") << eyesAngle;
+  // interocculary vector
+  ofVec2f IOV = rightEyeCentroid - leftEyeCentroid;
+  ofVec2f eyesCenter = .5 * (leftEyeCentroid + rightEyeCentroid);
+  float eyesAngle = 180.0 / PI * atan2(-IOV.y, IOV.x);
   
   float area = (leftEyeCentroid.distance(rightEyeCentroid) + leftEyeCentroid.distance(mouthCentroid) + mouthCentroid.distance(rightEyeCentroid)) / 2;
 
@@ -172,7 +173,7 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
       ofScale(scale, scale);
 
       ofTranslate(faceCentroid.x, faceCentroid.y);
-      ofRotate(rotation, 0, 0, 1);
+      ofRotate(ofLerp(0, eyesAngle, interpolate) , 0, 0, 1);
       ofTranslate(-faceCentroid.x, -faceCentroid.y);
       images[index].draw(0, 0);
   
@@ -185,9 +186,9 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
         }
       }
   
-      ofSetColor(0, 0, 255);
-      ofDrawLine(leftEyeCentroid.x, leftEyeCentroid.y, rightEyeCentroid.x, rightEyeCentroid.y);
-      ofDrawCircle(faceCentroid, 10/scale);
+//      ofSetColor(0, 0, 255);
+//      ofDrawLine(leftEyeCentroid, rightEyeCentroid);
+//      ofDrawCircle(faceCentroid, 10/scale);
   
     ofPopMatrix();
   fbos[index].end();
