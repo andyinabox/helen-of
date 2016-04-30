@@ -13,6 +13,8 @@ class ofApp : public ofBaseApp{
 		void update();
 		void draw();
   
+    void onTransitionChange(float &transition);
+  
     void next();
   
     float getWidth();
@@ -42,10 +44,16 @@ class ofApp : public ofBaseApp{
     bool playing = false;
     int currentIndex = 0;
   
+    float annotationSize;
+    float avgDisplacement;
+  
     ofxPanel gui;
     ofxFloatSlider faceAlign;
-    ofxFloatSlider annotationSize;
-    ofxFloatSlider avgDisplacement;
+    ofxFloatSlider maxAnnotationSize;
+    ofxFloatSlider minAnnotationSize;
+    ofxFloatSlider maxDisplacement;
+    ofxFloatSlider minDisplacement;
+    ofxFloatSlider transition;
     ofVec2f displacementDirection;
   
     ofxJSONElement data;

@@ -7,10 +7,15 @@ void ofApp::setup(){
 
   canvas.allocate(ofGetHeight()*0.75, ofGetHeight());
 
+  transition.addListener(this, &ofApp::onTransitionChange);
+
   gui.setup();
   gui.add(faceAlign.setup("Face align", 1.0, 0.0, 1.0));
-  gui.add(annotationSize.setup("Annotation size", 2.0, 0.0, 10.0));
-  gui.add(avgDisplacement.setup("Displacement", 0.3, 0.0, 10.0));
+  gui.add(maxAnnotationSize.setup("Max annotation size", 5.0, 0.0, 10.0));
+  gui.add(minAnnotationSize.setup("Min annotation size", 0.0, 0.0, 10.0));
+  gui.add(maxDisplacement.setup("Displacement", 5.0, 0.0, 10.0));
+  gui.add(minDisplacement.setup("Displacement", 0.3, 0.0, 10.0));
+  gui.add(transition.setup("Transition", 0.0, 0.0, 1.0));
   displacementDirection = ofVec2f(0, 0);
 
   bool parsingSuccessful = data.open("../../../shared/annotations.json");
@@ -78,6 +83,15 @@ void ofApp::draw(){
   
   gui.draw();
 }
+
+void ofApp::onTransitionChange(float &transition) {
+
+  faceAlign = transition;
+  annotationSize = ofLerp(maxAnnotationSize, minAnnotationSize, transition);
+  avgDisplacement = ofLerp(maxDisplacement, minDisplacement, transition);
+}
+
+
 
 void ofApp::next() {
 //  ofLogNotice("ofApp::next") << "get next image";
