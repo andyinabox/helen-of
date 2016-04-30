@@ -4,6 +4,10 @@ Helen
 Release Notes
 -------------
 
+### 0.1.1
+
+ * Facial rotation is working
+
 ### 0.1.0
 
  * Averaging shader working
@@ -13,7 +17,7 @@ Release Notes
 Todo
 ----
 
- - [ ] Face rotation
+ - [x] Face rotation
  - [ ] Add "crossfade" to avg shader
  - [ ] Slow it down! Or variable speed
  - [ ] Threaded image loading

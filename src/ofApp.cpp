@@ -8,7 +8,6 @@ void ofApp::setup(){
   canvas.allocate(ofGetHeight()*0.75, ofGetHeight());
 
   gui.setup();
-  gui.add(rotation.setup("Rotation", 15.0, -45.0, 45.0));
   gui.add(faceAlign.setup("Face align", 1.0, 0.0, 1.0));
   gui.add(annotationSize.setup("Annotation size", 2.0, 0.0, 10.0));
   gui.add(avgDisplacement.setup("Displacement", 0.3, 0.0, 10.0));
