@@ -44,6 +44,7 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 		
+    bool showGui = true;
     bool playing = false;
     int currentIndex = 0;
     int imageOffset = 0;
@@ -58,6 +59,7 @@ class ofApp : public ofBaseApp{
     ofxFloatSlider maxDisplacement;
     ofxFloatSlider minDisplacement;
     ofxFloatSlider transition;
+    ofxToggle loadOnPlay;
     ofVec2f displacementDirection;
   
     ofxJSONElement data;

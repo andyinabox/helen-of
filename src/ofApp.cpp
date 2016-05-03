@@ -16,6 +16,7 @@ void ofApp::setup(){
   gui.add(maxDisplacement.setup("Displacement", 5.0, 0.0, 10.0));
   gui.add(minDisplacement.setup("Displacement", 0.3, 0.0, 10.0));
   gui.add(transition.setup("Transition", 0.0, 0.0, 1.0));
+  gui.add(loadOnPlay.setup("Continuous image loading", true));
   displacementDirection = ofVec2f(0, 0);
 
   bool parsingSuccessful = data.open("../../../shared/annotations.json");
@@ -90,7 +91,9 @@ void ofApp::draw(){
       canvas.draw(0, 0);
     ofPopMatrix();
   
-  gui.draw();
+  if(showGui) {
+    gui.draw();
+  }
 }
 
 void ofApp::onTransitionChange(float &transition) {
@@ -105,6 +108,7 @@ void ofApp::onTransitionChange(float &transition) {
 void ofApp::next() {
 //  ofLogNotice("ofApp::next") << "get next image";
 //  pushHelenFbo(data[currentIndex]);
+  nextImage = ofImage();
   imageLoader.loadFromDisk(nextImage, getImagePath(data[currentIndex]));
 //  currentIndex++;
 }
@@ -142,11 +146,15 @@ void ofApp::addHelenFbo(ofxJSONElement item, bool draw) {
 void ofApp::pushHelenFbo(ofxJSONElement item, ofImage &img, bool draw) {
   int end = images.size() - 1;
   
-  std::rotate(fbos.begin(), fbos.begin()+1, fbos.end());
-  std::rotate(images.begin(), images.begin()+1, images.end());
+//  std::rotate(fbos.begin(), fbos.begin()+1, fbos.end());
+//  std::rotate(images.begin(), images.begin()+1, images.end());
 
-  images[end].setFromPixels(img.getPixels());
-  images[end].update();
+//  images[end].setFromPixels(img.getPixels());
+//  images[end].update();
+
+  images.push_back(img);
+  images.erase(images.begin());
+//  std::rotate(fbos.begin(), fbos.begin()+1, fbos.end());
 
   if(draw) {
     drawHelenFbo(item, end);
@@ -232,10 +240,10 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
 
 void ofApp::imageLoaded(ofxThreadedImageLoader::ThreadedLoaderEvent &e) {
   
-  pushHelenFbo(data[currentIndex], nextImage);
+  pushHelenFbo(data[currentIndex], nextImage, false);
   currentIndex++;
   
-  if(playing) {
+  if(playing && loadOnPlay) {
     next();
   }
   
