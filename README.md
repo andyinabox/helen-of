@@ -4,6 +4,11 @@ Helen
 Release Notes
 -------------
 
+### 0.1.2
+
+ * threaded image loading
+ * "rolling average" effect on faces
+
 ### 0.1.1
 
  * Facial rotation is working
@@ -21,7 +26,7 @@ Todo
  - [x] Add fader for multiple parameters in "zooming"
  - [ ] Add "crossfade" to avg shader
  - [ ] Slow it down! Or variable speed
- - [ ] Threaded image loading
+ - [x] Threaded image loading
  - [ ] Render annotations on canvas fbo rather than individual ones
    - [ ] Try single annotation with tweening?
  - [ ] Interactivity
