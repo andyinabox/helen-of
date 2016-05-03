@@ -10,6 +10,25 @@
 class ofApp : public ofBaseApp{
 
 	public:
+  
+    struct HelenDatum {
+      string fileName;
+      int imageWidth;
+      int imageHeight;
+      
+      vector<ofVec2f> points;
+      ofVec2f leftEyeCentroid;
+      ofVec2f rightEyeCentroid;
+      ofVec2f mouthCentroid;
+      ofVec2f centroid;
+      
+      ofVec2f IOV;
+      ofVec2f eyesCenter;
+      float eyesAngle;
+      float area;
+    };
+  
+  
 		void setup();
 		void update();
 		void draw();
@@ -28,9 +47,13 @@ class ofApp : public ofBaseApp{
   
     void imageLoaded(ofxThreadedImageLoader::ThreadedLoaderEvent &e);
   
+    vector<HelenDatum> parseData(ofxJSONElement data);
+  
     string getImagePath(ofxJSONElement item);
     string getSharedPath(string path);
     ofVec2f getCentroid(ofxJSONElement annotations, int start, int end);
+    ofVec2f getCentroid(vector<ofVec2f> annotations, int start, int end);
+
 
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -62,7 +85,7 @@ class ofApp : public ofBaseApp{
     ofxToggle loadOnPlay;
     ofVec2f displacementDirection;
   
-    ofxJSONElement data;
+    ofxJSONElement json;
     ofxJSONElement current;
     ofImage nextImage;
     vector<ofImage> images;

@@ -19,17 +19,18 @@ void ofApp::setup(){
   gui.add(loadOnPlay.setup("Continuous image loading", true));
   displacementDirection = ofVec2f(0, 0);
 
-  bool parsingSuccessful = data.open("../../../shared/annotations.json");
+  bool parsingSuccessful = json.open("../../../shared/annotations.json");
   
   if(parsingSuccessful) {
     ofLogNotice("ofApp::setup") << "Parsing successful!";
+    vector<HelenDatum> helenData = parseData(json);
   } else {
     ofLogNotice("ofApp::setup") << "Failed parsing";
   }
   
   // load images and allocate fbos
   for(currentIndex; currentIndex < imageCount; currentIndex++) {
-    addHelenFbo(data[currentIndex]);
+    addHelenFbo(json[currentIndex]);
   }
 
 
@@ -52,7 +53,7 @@ void ofApp::update(){
   }
 
   for(int i = 0; i < fbos.size(); i++) {
-    drawHelenFbo( data[currentIndex-(imageCount)+i], i);
+    drawHelenFbo( json[currentIndex-(imageCount)+i], i);
   }
   
   canvas.begin();
@@ -107,9 +108,9 @@ void ofApp::onTransitionChange(float &transition) {
 
 void ofApp::next() {
 //  ofLogNotice("ofApp::next") << "get next image";
-//  pushHelenFbo(data[currentIndex]);
+//  pushHelenFbo(json[currentIndex]);
   nextImage = ofImage();
-  imageLoader.loadFromDisk(nextImage, getImagePath(data[currentIndex]));
+  imageLoader.loadFromDisk(nextImage, getImagePath(json[currentIndex]));
 //  currentIndex++;
 }
 
@@ -240,7 +241,7 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
 
 void ofApp::imageLoaded(ofxThreadedImageLoader::ThreadedLoaderEvent &e) {
   
-  pushHelenFbo(data[currentIndex], nextImage, false);
+  pushHelenFbo(json[currentIndex], nextImage, false);
   currentIndex++;
   
   if(playing && loadOnPlay) {
@@ -250,6 +251,42 @@ void ofApp::imageLoaded(ofxThreadedImageLoader::ThreadedLoaderEvent &e) {
 }
 
 
+vector<ofApp::HelenDatum> ofApp::parseData(ofxJSONElement items) {
+  vector<ofApp::HelenDatum> helenData;
+  
+  for(auto item : items) {
+    ofApp::HelenDatum hd;
+
+    hd.fileName = item[0][0].asString();
+    hd.imageWidth = item[0][1].asFloat();
+    hd.imageHeight = item[0][2].asFloat();
+    
+    vector<ofVec2f> points;
+    for(auto p : item[1]) {
+      points.push_back(ofVec2f(p[0].asFloat(), p[1].asFloat()));
+    }
+    hd.points = points;
+        
+    hd.leftEyeCentroid = getCentroid(hd.points, LEFT_EYE_START, LEFT_EYE_END);
+    hd.rightEyeCentroid = getCentroid(hd.points, RIGHT_EYE_START, RIGHT_EYE_END);
+    ofVec2f mouthCentroid = getCentroid(hd.points, MOUTH_OUTLINE_START, MOUTH_OUTLINE_END);
+    hd.centroid = ofVec2f(
+      (hd.leftEyeCentroid.x + hd.rightEyeCentroid.x + hd.mouthCentroid.x)/3,
+      (hd.leftEyeCentroid.y + hd.rightEyeCentroid.y + hd.mouthCentroid.y)/3
+    );
+    
+    // interocculary vector
+    hd.IOV = hd.rightEyeCentroid - hd.leftEyeCentroid;
+    hd.eyesCenter = .5 * (hd.leftEyeCentroid + hd.rightEyeCentroid);
+    hd.eyesAngle = 180.0 / PI * atan2(-hd.IOV.y, hd.IOV.x);
+    
+    hd.area = (hd.leftEyeCentroid.distance(hd.rightEyeCentroid) + hd.leftEyeCentroid.distance(hd.mouthCentroid) + hd.mouthCentroid.distance(hd.rightEyeCentroid)) / 2;
+    
+    helenData.push_back(hd);
+  }
+  
+  return helenData;
+}
 
 string ofApp::getImagePath(ofxJSONElement item) {
   return getSharedPath(ofFilePath::join("images/", item[0][0].asString()));
@@ -260,17 +297,32 @@ string ofApp::getSharedPath(string path) {
 }
 
 ofVec2f ofApp::getCentroid(ofxJSONElement annotations, int start, int end) {
+    vector<ofVec2f> a;
+  
+    for(auto p : annotations) {
+      a.push_back(ofVec2f(p[0].asFloat(), p[1].asFloat()));
+    }
+  
+    return getCentroid(a, start, end);
+}
+
+ofVec2f ofApp::getCentroid(vector<ofVec2f> annotations, int start, int end) {
     float xt = 0;
     float yt = 0;
     int count = end - start;
   
-    for(int i = start; i < end; i++) {
-      xt += annotations[i][0].asFloat();
-      yt += annotations[i][1].asFloat();
+    if(annotations.size() >= end) {
+      for(int i = start; i < end; i++) {
+        xt += annotations[i].x;
+        yt += annotations[i].y;
+      }
+    } else {
+      ofLogNotice("ofApp::getCentroid") << "Not enough points!";
     }
   
     return ofVec2f(xt/count, yt/count);
 }
+
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
