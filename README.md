@@ -4,6 +4,11 @@ Helen
 Release Notes
 -------------
 
+### 0.1.3
+
+ * Render annotations on canvas fbo rather than individual ones (initial)
+ * Created data structure for data and perform more calcuations up front
+
 ### 0.1.2
 
  * threaded image loading
@@ -27,7 +32,7 @@ Todo
  - [ ] Add "crossfade" to avg shader
  - [ ] Slow it down! Or variable speed
  - [x] Threaded image loading
- - [ ] Render annotations on canvas fbo rather than individual ones
+ - [x] Render annotations on canvas fbo rather than individual ones
    - [ ] Try single annotation with tweening?
  - [ ] Interactivity
    - [ ] Basic frame differencing for detecting a viewer
