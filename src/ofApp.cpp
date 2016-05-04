@@ -10,6 +10,7 @@ void ofApp::setup(){
   transition.addListener(this, &ofApp::onTransitionChange);
 
   gui.setup();
+  gui.add(scaleFactor.setup("Scale factor", 300, 1, 500));
   gui.add(faceAlign.setup("Face align", 1.0, 0.0, 1.0));
   gui.add(maxAnnotationSize.setup("Max annotation size", 5.0, 0.0, 10.0));
   gui.add(minAnnotationSize.setup("Min annotation size", 0.0, 0.0, 10.0));
@@ -23,14 +24,14 @@ void ofApp::setup(){
   
   if(parsingSuccessful) {
     ofLogNotice("ofApp::setup") << "Parsing successful!";
-    vector<HelenDatum> helenData = parseData(json);
+    data = parseData(json);
   } else {
     ofLogNotice("ofApp::setup") << "Failed parsing";
   }
   
   // load images and allocate fbos
   for(currentIndex; currentIndex < imageCount; currentIndex++) {
-    addHelenFbo(json[currentIndex]);
+    addHelenFbo(data[currentIndex]);
   }
 
 
@@ -53,7 +54,7 @@ void ofApp::update(){
   }
 
   for(int i = 0; i < fbos.size(); i++) {
-    drawHelenFbo( json[currentIndex-(imageCount)+i], i);
+    drawHelenFbo( data[currentIndex-(imageCount)+i], i);
   }
   
   canvas.begin();
@@ -110,7 +111,7 @@ void ofApp::next() {
 //  ofLogNotice("ofApp::next") << "get next image";
 //  pushHelenFbo(json[currentIndex]);
   nextImage = ofImage();
-  imageLoader.loadFromDisk(nextImage, getImagePath(json[currentIndex]));
+  imageLoader.loadFromDisk(nextImage, getImagePath(data[currentIndex]));
 //  currentIndex++;
 }
 
@@ -122,7 +123,7 @@ float ofApp::getHeight() {
   return canvas.getHeight();
 }
 
-void ofApp::addHelenFbo(ofxJSONElement item, bool draw) {
+void ofApp::addHelenFbo(ofApp::HelenDatum item, bool draw) {
 
     ofImage img;
     img.load(getImagePath(item));
@@ -144,7 +145,7 @@ void ofApp::addHelenFbo(ofxJSONElement item, bool draw) {
     }
 }
 
-void ofApp::pushHelenFbo(ofxJSONElement item, ofImage &img, bool draw) {
+void ofApp::pushHelenFbo(HelenDatum item, ofImage &img, bool draw) {
   int end = images.size() - 1;
   
 //  std::rotate(fbos.begin(), fbos.begin()+1, fbos.end());
@@ -175,39 +176,39 @@ void ofApp::pushHelenFbo(ofxJSONElement item, ofImage &img, bool draw) {
 //  }
 //}
 
-void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
-
-  float baseImgWidth = item[0][1].asFloat();
-  float baseImgHeight = item[0][2].asFloat();
-  ofxJSONElement annotations = item[1];
-  ofVec2f leftEyeCentroid = getCentroid(annotations, LEFT_EYE_START, LEFT_EYE_END);
-  ofVec2f rightEyeCentroid = getCentroid(annotations, RIGHT_EYE_START, RIGHT_EYE_END);
-  ofVec2f mouthCentroid = getCentroid(annotations, MOUTH_OUTLINE_START, MOUTH_OUTLINE_END);
-  ofVec2f faceCentroid = ofVec2f(
-    (leftEyeCentroid.x + rightEyeCentroid.x + mouthCentroid.x)/3,
-    (leftEyeCentroid.y + rightEyeCentroid.y + mouthCentroid.y)/3
-  );
-  
-  // interocculary vector
-  ofVec2f IOV = rightEyeCentroid - leftEyeCentroid;
-  ofVec2f eyesCenter = .5 * (leftEyeCentroid + rightEyeCentroid);
-  float eyesAngle = 180.0 / PI * atan2(-IOV.y, IOV.x);
-  
-  float area = (leftEyeCentroid.distance(rightEyeCentroid) + leftEyeCentroid.distance(mouthCentroid) + mouthCentroid.distance(rightEyeCentroid)) / 2;
+void ofApp::drawHelenFbo(HelenDatum item, int index) {
+//
+//  float baseImgWidth = item[0][1].asFloat();
+//  float baseImgHeight = item[0][2].asFloat();
+//  ofxJSONElement annotations = item[1];
+//  ofVec2f leftEyeCentroid = getCentroid(annotations, LEFT_EYE_START, LEFT_EYE_END);
+//  ofVec2f rightEyeCentroid = getCentroid(annotations, RIGHT_EYE_START, RIGHT_EYE_END);
+//  ofVec2f mouthCentroid = getCentroid(annotations, MOUTH_OUTLINE_START, MOUTH_OUTLINE_END);
+//  ofVec2f faceCentroid = ofVec2f(
+//    (leftEyeCentroid.x + rightEyeCentroid.x + mouthCentroid.x)/3,
+//    (leftEyeCentroid.y + rightEyeCentroid.y + mouthCentroid.y)/3
+//  );
+//  
+//  // interocculary vector
+//  ofVec2f IOV = rightEyeCentroid - leftEyeCentroid;
+//  ofVec2f eyesCenter = .5 * (leftEyeCentroid + rightEyeCentroid);
+//  float eyesAngle = 180.0 / PI * atan2(-IOV.y, IOV.x);
+//  
+//  float area = (leftEyeCentroid.distance(rightEyeCentroid) + leftEyeCentroid.distance(mouthCentroid) + mouthCentroid.distance(rightEyeCentroid)) / 2;
 
   float interpolate = faceAlign;
-  float centeredScale = 200 / area;
+  float centeredScale = scaleFactor / item.area;
   float scale = ofLerp(1.0, centeredScale, interpolate);
 
   displacementDirection = ofVec2f(
-    ofMap((ofApp::getWidth()/2 - faceCentroid.x*scale), 0, ofApp::getWidth()/2, -1, 1, true),
-    ofMap((ofApp::getHeight()/2 - faceCentroid.y*scale), 0, ofApp::getHeight()/2, -1, 1, true)
+    ofMap((ofApp::getWidth()/2 - item.centroid.x*scale), 0, ofApp::getWidth()/2, -1, 1, true),
+    ofMap((ofApp::getHeight()/2 - item.centroid.y*scale), 0, ofApp::getHeight()/2, -1, 1, true)
   );
   
-  ofVec2f defaultTranslation = ofVec2f((ofApp::getWidth()-(baseImgWidth*scale))/2, (ofApp::getHeight()-(baseImgHeight*scale))/2);
+  ofVec2f defaultTranslation = ofVec2f((ofApp::getWidth()-(item.imageWidth*scale))/2, (ofApp::getHeight()-(item.imageHeight*scale))/2);
   ofVec2f centeredTranslation =  ofVec2f(
-    ofApp::getWidth()/2 - faceCentroid.x*scale,
-    ofApp::getHeight()/2 - faceCentroid.y*scale
+    ofApp::getWidth()/2 - item.centroid.x*scale,
+    ofApp::getHeight()/2 - item.centroid.y*scale
   );
   ofVec2f faceTranslation = defaultTranslation.getInterpolated(centeredTranslation, interpolate);
 
@@ -217,16 +218,16 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
     ofPushMatrix();
       ofTranslate(faceTranslation.x, faceTranslation.y);
       ofScale(scale, scale);
-      ofTranslate(faceCentroid.x, faceCentroid.y);
-      ofRotate(ofLerp(0, eyesAngle, interpolate) , 0, 0, 1);
-      ofTranslate(-faceCentroid.x, -faceCentroid.y);
+      ofTranslate(item.centroid.x, item.centroid.y);
+      ofRotate(ofLerp(0, item.eyesAngle, interpolate) , 0, 0, 1);
+      ofTranslate(-item.centroid.x, -item.centroid.y);
       images[index].draw(0, 0);
   
       // draw face points
       if(annotationSize > 0) {
-        for(auto p : annotations) {
+        for(auto p : item.points) {
           ofPushStyle();
-            ofDrawCircle(p[0].asFloat(), p[1].asFloat(), annotationSize/scale);
+            ofDrawCircle(p.x, p.y, annotationSize/scale);
           ofPopStyle();
         }
       }
@@ -241,7 +242,7 @@ void ofApp::drawHelenFbo(ofxJSONElement item, int index) {
 
 void ofApp::imageLoaded(ofxThreadedImageLoader::ThreadedLoaderEvent &e) {
   
-  pushHelenFbo(json[currentIndex], nextImage, false);
+  pushHelenFbo(data[currentIndex], nextImage, false);
   currentIndex++;
   
   if(playing && loadOnPlay) {
@@ -258,8 +259,8 @@ vector<ofApp::HelenDatum> ofApp::parseData(ofxJSONElement items) {
     ofApp::HelenDatum hd;
 
     hd.fileName = item[0][0].asString();
-    hd.imageWidth = item[0][1].asFloat();
-    hd.imageHeight = item[0][2].asFloat();
+    hd.imageWidth = item[0][1].asInt();
+    hd.imageHeight = item[0][2].asInt();
     
     vector<ofVec2f> points;
     for(auto p : item[1]) {
@@ -269,7 +270,7 @@ vector<ofApp::HelenDatum> ofApp::parseData(ofxJSONElement items) {
         
     hd.leftEyeCentroid = getCentroid(hd.points, LEFT_EYE_START, LEFT_EYE_END);
     hd.rightEyeCentroid = getCentroid(hd.points, RIGHT_EYE_START, RIGHT_EYE_END);
-    ofVec2f mouthCentroid = getCentroid(hd.points, MOUTH_OUTLINE_START, MOUTH_OUTLINE_END);
+    hd.mouthCentroid = getCentroid(hd.points, MOUTH_OUTLINE_START, MOUTH_OUTLINE_END);
     hd.centroid = ofVec2f(
       (hd.leftEyeCentroid.x + hd.rightEyeCentroid.x + hd.mouthCentroid.x)/3,
       (hd.leftEyeCentroid.y + hd.rightEyeCentroid.y + hd.mouthCentroid.y)/3
@@ -292,19 +293,24 @@ string ofApp::getImagePath(ofxJSONElement item) {
   return getSharedPath(ofFilePath::join("images/", item[0][0].asString()));
 }
 
+string ofApp::getImagePath(ofApp::HelenDatum item) {
+  return getSharedPath(ofFilePath::join("images/", item.fileName));
+}
+
+
 string ofApp::getSharedPath(string path) {
   return ofFilePath::join("../../../shared/", path);
 }
 
-ofVec2f ofApp::getCentroid(ofxJSONElement annotations, int start, int end) {
-    vector<ofVec2f> a;
-  
-    for(auto p : annotations) {
-      a.push_back(ofVec2f(p[0].asFloat(), p[1].asFloat()));
-    }
-  
-    return getCentroid(a, start, end);
-}
+//ofVec2f ofApp::getCentroid(ofxJSONElement annotations, int start, int end) {
+//    vector<ofVec2f> a;
+//  
+//    for(auto p : annotations) {
+//      a.push_back(ofVec2f(p[0].asFloat(), p[1].asFloat()));
+//    }
+//  
+//    return getCentroid(a, start, end);
+//}
 
 ofVec2f ofApp::getCentroid(vector<ofVec2f> annotations, int start, int end) {
     float xt = 0;

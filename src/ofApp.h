@@ -40,18 +40,20 @@ class ofApp : public ofBaseApp{
     float getWidth();
     float getHeight();
   
-    void addHelenFbo(ofxJSONElement item, bool draw=true);
-    void pushHelenFbo(ofxJSONElement item, ofImage &img , bool draw=true);
+    void addHelenFbo(HelenDatum item, bool draw=true);
+    void pushHelenFbo(HelenDatum item, ofImage &img , bool draw=true);
 //    void pushHelenFbo(ofxJSONElement item, bool draw=true);
-    void drawHelenFbo(ofxJSONElement item, int index);
+    void drawHelenFbo(HelenDatum item, int index);
   
     void imageLoaded(ofxThreadedImageLoader::ThreadedLoaderEvent &e);
   
     vector<HelenDatum> parseData(ofxJSONElement data);
   
     string getImagePath(ofxJSONElement item);
+    string getImagePath(HelenDatum item);
+
     string getSharedPath(string path);
-    ofVec2f getCentroid(ofxJSONElement annotations, int start, int end);
+//    ofVec2f getCentroid(ofxJSONElement annotations, int start, int end);
     ofVec2f getCentroid(vector<ofVec2f> annotations, int start, int end);
 
 
@@ -76,6 +78,7 @@ class ofApp : public ofBaseApp{
     float avgDisplacement;
   
     ofxPanel gui;
+    ofxFloatSlider scaleFactor;
     ofxFloatSlider faceAlign;
     ofxFloatSlider maxAnnotationSize;
     ofxFloatSlider minAnnotationSize;
@@ -85,6 +88,7 @@ class ofApp : public ofBaseApp{
     ofxToggle loadOnPlay;
     ofVec2f displacementDirection;
   
+    vector<HelenDatum> data;
     ofxJSONElement json;
     ofxJSONElement current;
     ofImage nextImage;
