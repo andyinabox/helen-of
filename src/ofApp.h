@@ -48,14 +48,10 @@ class ofApp : public ofBaseApp{
     void imageLoaded(ofxThreadedImageLoader::ThreadedLoaderEvent &e);
   
     vector<HelenDatum> parseData(ofxJSONElement data);
-  
-    string getImagePath(ofxJSONElement item);
     string getImagePath(HelenDatum item);
-
     string getSharedPath(string path);
-//    ofVec2f getCentroid(ofxJSONElement annotations, int start, int end);
     ofVec2f getCentroid(vector<ofVec2f> annotations, int start, int end);
-
+//    HelenDatum getAverageAnnotations(vector<HelenDatum> data, int start, int end);
 
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -79,6 +75,7 @@ class ofApp : public ofBaseApp{
   
     ofxPanel gui;
     ofxFloatSlider scaleFactor;
+    ofxFloatSlider topAnnotationsOpacity;
     ofxFloatSlider faceAlign;
     ofxFloatSlider maxAnnotationSize;
     ofxFloatSlider minAnnotationSize;
