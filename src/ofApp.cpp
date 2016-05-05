@@ -4,10 +4,14 @@
 void ofApp::setup(){
   ofSetVerticalSync(true);
   ofSetFrameRate(30);
-//  ofSetFullscreen(true);
 
-  canvas.allocate(ofGetHeight()*0.75, ofGetHeight());
-
+  #ifdef INSTALLATION_MODE
+    ofSetFullscreen(true);
+    canvas.allocate(ofGetHeight(), ofGetWidth());
+  #else 
+    canvas.allocate(ofGetHeight()*0.75, ofGetHeight());
+  #endif
+  
   transition.addListener(this, &ofApp::onTransitionChange);
 
   gui.setup();
@@ -113,7 +117,15 @@ void ofApp::draw(){
   ofClear(0);
   
     ofPushMatrix();
-      ofTranslate((ofGetWidth()-ofApp::getWidth())/2, 0);
+  
+      #ifdef INSTALLATION_MODE
+        ofTranslate((ofGetWidth()-ofApp::getWidth())/2, (ofGetHeight()-ofApp::getHeight())/2);
+        ofTranslate(canvas.getWidth()/2, canvas.getHeight()/2);
+        ofRotate(-90, 0, 0, 1);
+        ofTranslate(-canvas.getWidth()/2, -canvas.getHeight()/2);
+      #else
+        ofTranslate((ofGetWidth()-ofApp::getWidth())/2, 0);
+      #endif
       canvas.draw(0, 0);
     ofPopMatrix();
   

@@ -7,6 +7,8 @@
 
 #include "ShaderScreen.h"
 
+//#define INSTALLATION_MODE
+
 class ofApp : public ofBaseApp{
 
 	public:
