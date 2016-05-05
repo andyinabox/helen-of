@@ -64,6 +64,7 @@
 		C17F364E1CD313D300EBE43C /* data */ = {isa = PBXFileReference; lastKnownFileType = folder; name = data; path = bin/data; sourceTree = "<group>"; };
 		C19B6D131CD92B630065C585 /* ofxThreadedImageLoader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ofxThreadedImageLoader.cpp; sourceTree = "<group>"; };
 		C19B6D141CD92B630065C585 /* ofxThreadedImageLoader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ofxThreadedImageLoader.h; sourceTree = "<group>"; };
+		C1A13AA11CDA565F00BB1575 /* deploy.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = deploy.sh; sourceTree = "<group>"; };
 		C1ACEBE91CD3B518003F16DC /* ofxBaseGui.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ofxBaseGui.cpp; sourceTree = "<group>"; };
 		C1ACEBEA1CD3B518003F16DC /* ofxBaseGui.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ofxBaseGui.h; sourceTree = "<group>"; };
 		C1ACEBEB1CD3B518003F16DC /* ofxButton.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ofxButton.cpp; sourceTree = "<group>"; };
@@ -248,6 +249,7 @@
 			isa = PBXGroup;
 			children = (
 				C1ACEC041CD3C33F003F16DC /* README.md */,
+				C1A13AA11CDA565F00BB1575 /* deploy.sh */,
 				C1ACEC051CD3C33F003F16DC /* VERSION */,
 				C17F364E1CD313D300EBE43C /* data */,
 				E4B6FCAD0C3E899E008CF71C /* openFrameworks-Info.plist */,

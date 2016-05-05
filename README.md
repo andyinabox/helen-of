@@ -27,13 +27,14 @@ Release Notes
 Todo
 ----
 
- - [x] Face rotation
- - [x] Add fader for multiple parameters in "zooming"
+### 1.0.0
+- [ ] Saving settings
+- [ ] Allow for sideways projector mode
+- [ ] Variable speed
+- [ ] Interactivity
+ - [ ] Presense detection
+ - [ ] Face detection
+
+
+## Misc
  - [ ] Add "crossfade" to avg shader
- - [ ] Slow it down! Or variable speed
- - [x] Threaded image loading
- - [x] Render annotations on canvas fbo rather than individual ones
-   - [ ] Try single annotation with tweening?
- - [ ] Interactivity
-   - [ ] Basic frame differencing for detecting a viewer
-   - [ ] Facial recognition and tracking
