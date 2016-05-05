@@ -20,10 +20,13 @@ void ofApp::setup(){
   gui.add(faceAlign.setup("Face align", 1.0, 0.0, 1.0));
   gui.add(maxAnnotationSize.setup("Max annotation size", 5.0, 0.0, 10.0));
   gui.add(minAnnotationSize.setup("Min annotation size", 0.0, 0.0, 10.0));
-  gui.add(maxDisplacement.setup("Displacement", 5.0, 0.0, 10.0));
-  gui.add(minDisplacement.setup("Displacement", 0.3, 0.0, 10.0));
+  gui.add(maxDisplacement.setup("Max displacement", 5.0, 0.0, 10.0));
+  gui.add(minDisplacement.setup("Min displacement", 0.3, 0.0, 10.0));
   gui.add(transition.setup("Transition", 0.0, 0.0, 1.0));
   gui.add(loadOnPlay.setup("Continuous image loading", true));
+  
+  gui.loadFromFile("settings.xml");
+
   displacementDirection = ofVec2f(0, 0);
 
   bool parsingSuccessful = json.open("../../../shared/annotations.json");
@@ -360,6 +363,18 @@ void ofApp::keyPressed(int key){
   
   if(key == 'k') {
     next();
+  }
+  
+  if(key == 'g') {
+    showGui = !showGui;
+  }
+  
+  if(key == 'l') {
+    gui.loadFromFile("settings.xml");
+  }
+  
+  if(key == 's') {
+    gui.saveToFile("settings.xml");
   }
 }
 

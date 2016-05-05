@@ -63,3 +63,4 @@ bin/data/videos/*
 *.xcodeproj/project.xcworkspace/xcuserdata/*.xcuserdatad/UserInterfaceState.xcuserstate
 *.xcodeproj/xcuserdata/*.xcuserdatad/xcdebugger/
 *.xcodeproj/project.xcworkspace/xcshareddata/
+bin/data/settings.xml
