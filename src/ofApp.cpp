@@ -101,8 +101,6 @@ void ofApp::update(){
   canvas.begin();
     ofClear(0);
   
-    ofDrawRectangle(0, 0, canvas.getWidth(), canvas.getHeight());
-  
     avg.begin();
   
       // set standard uniforms
@@ -124,26 +122,7 @@ void ofApp::update(){
     avg.end();
 
     if(topAnnotationsOpacity > 0) {
-
-      HelenDatum latest = data[currentIndex];
-      float scale = scaleFactor / latest.area;
-    
-      ofPushMatrix();
-        ofTranslate(
-          canvas.getWidth()/2 - latest.centroid.x*scale,
-          canvas.getHeight()/2 - latest.centroid.y*scale
-        );
-        ofScale(scale, scale);
-        ofTranslate(latest.centroid.x, latest.centroid.y);
-        ofRotate(latest.eyesAngle, 0, 0, 1);
-        ofTranslate(-latest.centroid.x, -latest.centroid.y);
-    
-        ofSetColor(255, 255, 255, 255*topAnnotationsOpacity);
-    
-        for(auto p : latest.points) {
-          ofDrawCircle(p.x, p.y, annotationSize/scale);
-        }
-      ofPopMatrix();
+      drawAnnotations();
     }
   
   canvas.end();
@@ -161,7 +140,7 @@ void ofApp::updateCanvas() {
     newWidth = ofGetHeight()*0.75;
     newHeight = ofGetHeight();
   }
-  ofLogNotice("updateCanvas") << newWidth << " " << newHeight;
+  ofLogNotice("ofApp::updateCanvas") << newWidth << ", " << newHeight;
   
   canvas.allocate(newWidth, newHeight);
   screen.update(newWidth, newHeight);
@@ -169,15 +148,15 @@ void ofApp::updateCanvas() {
   for(auto fbo : fbos) {
     fbo.clear();
     fbo.allocate(newWidth, newHeight);
-    ofLogNotice("updateCanvas:fbo") << fbo.getWidth() << " " << fbo.getHeight();
   }
   
 }
 
 void ofApp::draw(){
   ofClear(0);
-
+  
     ofPushMatrix();
+  
       if(rotated) {
         ofTranslate((ofGetWidth()-ofApp::getWidth())/2, (ofGetHeight()-ofApp::getHeight())/2);
         ofTranslate(canvas.getWidth()/2, canvas.getHeight()/2);
@@ -186,10 +165,9 @@ void ofApp::draw(){
       } else {
         ofTranslate((ofGetWidth()-ofApp::getWidth())/2, 0);
       }
+  
       canvas.draw(0, 0);
     ofPopMatrix();
-  
-    ofDrawBitmapStringHighlight(ofToString(fbos[0].getWidth()) + " " + ofToString(fbos[0].getHeight()) , 10, 10);
   
   
   if(showGui) {
@@ -200,6 +178,28 @@ void ofApp::draw(){
 void ofApp::drawGui() {
   gui.draw();
   detector.draw(ofGetWidth()-(camWidth/2), ofGetHeight()-(camHeight/2), camWidth/2, camHeight/2);
+}
+
+void ofApp::drawAnnotations() {
+  HelenDatum latest = data[currentIndex];
+  float scale = scaleFactor / latest.area;
+
+  ofPushMatrix();
+    ofTranslate(
+      canvas.getWidth()/2 - latest.centroid.x*scale,
+      canvas.getHeight()/2 - latest.centroid.y*scale
+    );
+    ofScale(scale, scale);
+    ofTranslate(latest.centroid.x, latest.centroid.y);
+    ofRotate(latest.eyesAngle, 0, 0, 1);
+    ofTranslate(-latest.centroid.x, -latest.centroid.y);
+
+    ofSetColor(255, 255, 255, 255*topAnnotationsOpacity);
+
+    for(auto p : latest.points) {
+      ofDrawCircle(p.x, p.y, annotationSize/scale);
+    }
+  ofPopMatrix();
 }
 
 void ofApp::onToggleRotation() {
@@ -281,11 +281,6 @@ void ofApp::drawFbo(HelenDatum item, int index) {
   
   fbos[index].begin();
     ofClear(0);
-  
-    ofPushStyle();
-      ofSetColor(0, 255, 0);
-      ofDrawRectangle(0, 0, fbos[index].getWidth(), fbos[index].getHeight());
-    ofPopStyle();
 
     ofPushMatrix();
       ofTranslate(faceTranslation.x, faceTranslation.y);

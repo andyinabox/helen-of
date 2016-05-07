@@ -42,6 +42,7 @@ class ofApp : public ofBaseApp{
 
 		void draw();
     void drawGui();
+    void drawAnnotations();
     void exit();
 
     // loading new images
