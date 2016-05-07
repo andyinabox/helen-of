@@ -4,13 +4,21 @@
 #include "ofxJSON.h"
 #include "ofxGui.h"
 #include "ofxThreadedImageLoader.h"
+#include "ofxCv.h"
+#include "ofxFaceTrackerThreaded.h"
+
+
+#define USE_PS3EYE 
+
+#ifdef USE_PS3EYE
+//#include "ofxKinect.h"
+#include "ofxPS3EyeGrabber.h"
+#endif
+
 
 #include "ShaderScreen.h"
 #include "Detector.h"
 
-//#define INSTALLATION_MODE
-
-#define EXHIBITION
 
 class ofApp : public ofBaseApp{
 
@@ -96,8 +104,8 @@ class ofApp : public ofBaseApp{
   
     int currentIndex = 0;
     int imageOffset = 0;
-    int camWidth = 360;
-    int camHeight = 240;
+    int camWidth = 640;
+    int camHeight = 480;
     int detectRegionWidth = camWidth;
     int detectRegionHeight = camHeight;
     float annotationSize;
@@ -113,6 +121,7 @@ class ofApp : public ofBaseApp{
     // misc
     ofVideoGrabber grabber;
     Detector detector;
+    ofxFaceTrackerThreaded tracker;
     ofImage nextImage;
     ofShader avg;
     ShaderScreen screen;

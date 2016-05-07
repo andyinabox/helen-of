@@ -37,9 +37,14 @@ void ofApp::setup(){
   gui.loadFromFile("settings.xml");
 
 	// video grabber setup
+  #ifdef USE_PS3EYE
+  grabber.setGrabber(std::make_shared<ofxPS3EyeGrabber>());
+  #endif
 	grabber.setDesiredFrameRate(30);
-	grabber.initGrabber(camWidth ,camHeight);
+	grabber.setup(camWidth ,camHeight);
   detector.setup(ofRectangle(0, 0, camWidth, camHeight), detectThreshold, 300, 10);
+  tracker.setup();
+
 
   // set canvas size
   screen.setup(ofGetWidth(), ofGetHeight());
@@ -80,6 +85,7 @@ void ofApp::update(){
     if(grabber.isFrameNew()) {
       detector.setPresenceThreshold(detectThreshold);
       detector.update(grabber);
+      tracker.update(ofxCv::toCv(grabber));
     }
     
     // update transition value based on presence
@@ -104,6 +110,8 @@ void ofApp::update(){
     if(topAnnotationsOpacity > 0) {
       drawAnnotations();
     }
+  
+//    tracker.draw();
   
   canvas.end();
   
@@ -149,6 +157,7 @@ void ofApp::draw(){
       }
   
       canvas.draw(0, 0);
+  
     ofPopMatrix();
   
   
@@ -262,7 +271,10 @@ void ofApp::onTransitionChange(float &transition) {
   avgDisplacement = ofLerp(maxDisplacement, minDisplacement, transition);
 }
 
-void ofApp::exit() {}
+void ofApp::exit() {
+  tracker.waitForThread();
+  imageLoader.waitForThread();
+}
 
 void ofApp::next() {
   imageLoader.loadFromDisk(nextImage, getImagePath(data[currentIndex]));
