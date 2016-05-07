@@ -4,6 +4,11 @@ Helen
 Release Notes
 -------------
 
+### 0.1.4
+
+ * Added basic background subtraction to control image
+ * Manual installation mode via constants
+
 ### 0.1.3
 
  * Render annotations on canvas fbo rather than individual ones (initial)

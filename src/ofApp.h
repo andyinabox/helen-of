@@ -8,7 +8,7 @@
 #include "ShaderScreen.h"
 #include "Detector.h"
 
-#define INSTALLATION_MODE
+//#define INSTALLATION_MODE
 
 class ofApp : public ofBaseApp{
 
