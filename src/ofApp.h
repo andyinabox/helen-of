@@ -38,11 +38,13 @@ class ofApp : public ofBaseApp{
     // standard app methods
 		void setup();
 		void update();
-    void updateCanvas();
+    void updateCanvasSize();
 
 		void draw();
     void drawGui();
     void drawAnnotations();
+    void drawFbo(HelenDatum item, int index);
+    void drawAverage();
     void exit();
 
     // loading new images
@@ -52,7 +54,6 @@ class ofApp : public ofBaseApp{
     // fbo management functions
     void addFbo(HelenDatum item, bool draw=true);
     void pushFbo(HelenDatum item, ofImage &img , bool draw=true);
-    void drawFbo(HelenDatum item, int index);
   
     // misc utility methods
     float getWidth();
@@ -91,7 +92,7 @@ class ofApp : public ofBaseApp{
 		
     bool showGui = true;
     bool playing = false;
-    bool rotated = true;
+    bool rotated = false;
   
     int currentIndex = 0;
     int imageOffset = 0;
@@ -101,7 +102,7 @@ class ofApp : public ofBaseApp{
     int detectRegionHeight = camHeight;
     float annotationSize;
     float avgDisplacement;
-    ofVec2f displacementDirection;
+    ofVec2f displacementDirection = ofVec2f(0, 0);
   
     // our dataset
     ofxJSONElement json;

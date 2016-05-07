@@ -4,71 +4,64 @@ void ofApp::setup(){
   ofSetVerticalSync(true);
   ofSetFrameRate(30);
 
+  // load data
+  if(json.open("../../../shared/annotations.json")) {
+    ofLogNotice("ofApp::setup") << "Parsing successful! " << json.size() << " entries loaded";
+    data = parseData(json);
+  } else {
+    ofLogNotice("ofApp::setup") << "Failed parsing";
+  }
+
+  // setup gui
   transition.addListener(this, &ofApp::onTransitionChange);
   toggleRotation.addListener(this, &ofApp::onToggleRotation);
-
-  gui.setup();
   
+  gui.setup();
   gui.add(loadOnPlay.setup("New img loading", true));
   gui.add(transition.setup("Transition", 0.0, 0.0, 1.0));
   gui.add(toggleRotation.setup("Toggle rotation"));
-
   gui.add(transformsLabel.setup("// TRANSFORMS", ""));
   gui.add(faceAlign.setup("Face align", 1.0, 0.0, 1.0));
   gui.add(scaleFactor.setup("Scale", 300, 1, 500));
   gui.add(maxDisplacement.setup("Begin displacement", 5.0, 0.0, 10.0));
   gui.add(minDisplacement.setup("End displacement", 0.3, 0.0, 10.0));
-
   gui.add(annotationsLabel.setup("// ANNOTATIONS", ""));
   gui.add(topAnnotationsOpacity.setup("Top annotation opacity", 0., 0.0, 1.0));
   gui.add(maxAnnotationSize.setup("Begin annotation size", 5.0, 0.0, 10.0));
   gui.add(minAnnotationSize.setup("End annotation size", 0.0, 0.0, 10.0));
-  
   gui.add(detectLabel.setup("// DETECTION", ""));
   gui.add(useDetection.setup("Use detection", true));
 	gui.add(detectThreshold.setup("Detect lower threshold", 0.1, 0.0, 1.0));
 	gui.add(detectUpperThreshold.setup("Detect upper threshold", 0.8, 0.0, 1.0));
   gui.add(resetBackgroundDelay.setup("Reset delay", 1000, 0, 120000));
+  gui.loadFromFile("settings.xml");
 
 	// video grabber setup
 	grabber.setDesiredFrameRate(30);
 	grabber.initGrabber(camWidth ,camHeight);
   detector.setup(ofRectangle(0, 0, camWidth, camHeight), detectThreshold, 300, 10);
 
+  // set canvas size
+  screen.setup(ofGetWidth(), ofGetHeight());
+  updateCanvasSize();
   
-  gui.loadFromFile("settings.xml");
+  // load shader
+  avg.load("shaders/avg");
+  
+  // setup listener for image loader
+  ofAddListener(imageLoader.ThreadedLoaderE, this, &ofApp::onImageLoaded);
 
-  displacementDirection = ofVec2f(0, 0);
-  
-  
-  
-  if(json.open("../../../shared/annotations.json")) {
-    ofLogNotice("ofApp::setup") << "Parsing successful!";
-    data = parseData(json);
-  } else {
-    ofLogNotice("ofApp::setup") << "Failed parsing";
-  }
-  
-  updateCanvas();
-  
   // load images and allocate fbos
   for(currentIndex; currentIndex < imageCount; currentIndex++) {
     addFbo(data[currentIndex]);
   }
 
-
-  // load shader
-  avg.load("shaders/avg");
-  
-  screen.setup(ofApp::getWidth(), ofApp::getHeight());
-  ofAddListener(imageLoader.ThreadedLoaderE, this, &ofApp::onImageLoaded);
-  
-
 }
 
 void ofApp::update(){
 
-
+  // update image playback by incrementing
+  // image offset
   if(playing) {
     if(imageOffset < imageCount-1) {
       imageOffset++;
@@ -77,50 +70,37 @@ void ofApp::update(){
     }
   }
   
+  // if using background subtraction, update
+  // detection
   if(useDetection) {
   
     grabber.update();
+    
+    // update detector from latest frame
     if(grabber.isFrameNew()) {
       detector.setPresenceThreshold(detectThreshold);
       detector.update(grabber);
     }
     
-    float presence = detector.getPresence();
-    if(presence > detectThreshold) {
-      transition = ofMap(presence, detectThreshold, detectUpperThreshold, 0.0, 1.0, true);
+    // update transition value based on presence
+    if(detector.isPresent()) {
+      transition = ofMap(detector.getPresence(), detectThreshold, detectUpperThreshold, 0.0, 1.0, true);
     }
   }
   
-
-
-
+  // go through and redraw all of the fbos
   for(int i = 0; i < fbos.size(); i++) {
     drawFbo( data[currentIndex-(imageCount)+i], i);
   }
   
+  // update the canvas fbo
   canvas.begin();
     ofClear(0);
   
-    avg.begin();
-  
-      // set standard uniforms
-      avg.setUniform1f("u_displacement", avgDisplacement);
-      avg.setUniform2f("u_direction", displacementDirection);
-  
-      // set texture uniforms
-      // this will cycle through the current
-      // slice of images
-      for(int i = 0; i < fbos.size(); i++) {
-        int j = abs(i-imageOffset);
-        string texName = "tex"+ofToString(i);
-        avg.setUniformTexture(texName, fbos[j].getTexture(0), i);
-      }
-  
-      // draw empty screen
-      screen.draw();
-    
-    avg.end();
+    // draw to average shader
+    drawAverage();
 
+    // overlay annotations (if enabled)
     if(topAnnotationsOpacity > 0) {
       drawAnnotations();
     }
@@ -130,7 +110,7 @@ void ofApp::update(){
 }
 
 
-void ofApp::updateCanvas() {
+void ofApp::updateCanvasSize() {
   int newWidth, newHeight;
   
   if(rotated) {
@@ -140,7 +120,7 @@ void ofApp::updateCanvas() {
     newWidth = ofGetHeight()*0.75;
     newHeight = ofGetHeight();
   }
-  ofLogNotice("ofApp::updateCanvas") << newWidth << ", " << newHeight;
+  ofLogNotice("ofApp::updateCanvasSize") << newWidth << ", " << newHeight;
   
   canvas.allocate(newWidth, newHeight);
   screen.update(newWidth, newHeight);
@@ -157,6 +137,8 @@ void ofApp::draw(){
   
     ofPushMatrix();
   
+      // rotate and translate canvas based
+      // on current settings
       if(rotated) {
         ofTranslate((ofGetWidth()-ofApp::getWidth())/2, (ofGetHeight()-ofApp::getHeight())/2);
         ofTranslate(canvas.getWidth()/2, canvas.getHeight()/2);
@@ -178,6 +160,9 @@ void ofApp::draw(){
 void ofApp::drawGui() {
   gui.draw();
   detector.draw(ofGetWidth()-(camWidth/2), ofGetHeight()-(camHeight/2), camWidth/2, camHeight/2);
+  
+  ofDrawBitmapStringHighlight(ofToString(int(ofGetFrameRate()))+" fps", 5, ofGetHeight()-10);
+
 }
 
 void ofApp::drawAnnotations() {
@@ -202,9 +187,72 @@ void ofApp::drawAnnotations() {
   ofPopMatrix();
 }
 
+void ofApp::drawAverage() {
+    avg.begin();
+  
+      // set standard uniforms
+      avg.setUniform1f("u_displacement", avgDisplacement);
+      avg.setUniform2f("u_direction", displacementDirection);
+  
+      // set texture uniforms
+      // this will cycle through the current
+      // slice of images
+      for(int i = 0; i < fbos.size(); i++) {
+        int j = abs(i-imageOffset);
+        avg.setUniformTexture("tex"+ofToString(i), fbos[j].getTexture(0), i);
+      }
+  
+      // draw empty screen
+      screen.draw();
+    
+    avg.end();
+}
+
+void ofApp::drawFbo(HelenDatum item, int index) {
+
+  float interpolate = faceAlign;
+  float centeredScale = scaleFactor / item.area;
+  float scale = ofLerp(1.0, centeredScale, interpolate);
+
+  displacementDirection = ofVec2f(
+    ofMap((ofApp::getWidth()/2 - item.centroid.x*scale), 0, ofApp::getWidth()/2, -1, 1, true),
+    ofMap((ofApp::getHeight()/2 - item.centroid.y*scale), 0, ofApp::getHeight()/2, -1, 1, true)
+  );
+  
+  ofVec2f defaultTranslation = ofVec2f((ofApp::getWidth()-(item.imageWidth*scale))/2, (ofApp::getHeight()-(item.imageHeight*scale))/2);
+  ofVec2f centeredTranslation =  ofVec2f(
+    ofApp::getWidth()/2 - item.centroid.x*scale,
+    ofApp::getHeight()/2 - item.centroid.y*scale
+  );
+  ofVec2f faceTranslation = defaultTranslation.getInterpolated(centeredTranslation, interpolate);
+  
+  fbos[index].begin();
+    ofClear(0);
+
+    ofPushMatrix();
+      ofTranslate(faceTranslation.x, faceTranslation.y);
+      ofScale(scale, scale);
+      ofTranslate(item.centroid.x, item.centroid.y);
+      ofRotate(ofLerp(0, item.eyesAngle, interpolate) , 0, 0, 1);
+      ofTranslate(-item.centroid.x, -item.centroid.y);
+      images[index].draw(0, 0);
+  
+      // draw face points
+      if(annotationSize > 0) {
+        for(auto p : item.points) {
+          ofPushStyle();
+            ofDrawCircle(p.x, p.y, annotationSize/scale);
+          ofPopStyle();
+        }
+      }
+  
+    ofPopMatrix();
+  fbos[index].end();
+}
+
 void ofApp::onToggleRotation() {
   rotated  = !rotated;
-  updateCanvas();
+  updateCanvasSize();
 }
 
 void ofApp::onTransitionChange(float &transition) {
@@ -261,47 +309,6 @@ void ofApp::pushFbo(HelenDatum item, ofImage &img, bool draw) {
   }
 }
 
-void ofApp::drawFbo(HelenDatum item, int index) {
-
-  float interpolate = faceAlign;
-  float centeredScale = scaleFactor / item.area;
-  float scale = ofLerp(1.0, centeredScale, interpolate);
-
-  displacementDirection = ofVec2f(
-    ofMap((ofApp::getWidth()/2 - item.centroid.x*scale), 0, ofApp::getWidth()/2, -1, 1, true),
-    ofMap((ofApp::getHeight()/2 - item.centroid.y*scale), 0, ofApp::getHeight()/2, -1, 1, true)
-  );
-  
-  ofVec2f defaultTranslation = ofVec2f((ofApp::getWidth()-(item.imageWidth*scale))/2, (ofApp::getHeight()-(item.imageHeight*scale))/2);
-  ofVec2f centeredTranslation =  ofVec2f(
-    ofApp::getWidth()/2 - item.centroid.x*scale,
-    ofApp::getHeight()/2 - item.centroid.y*scale
-  );
-  ofVec2f faceTranslation = defaultTranslation.getInterpolated(centeredTranslation, interpolate);
-  
-  fbos[index].begin();
-    ofClear(0);
-
-    ofPushMatrix();
-      ofTranslate(faceTranslation.x, faceTranslation.y);
-      ofScale(scale, scale);
-      ofTranslate(item.centroid.x, item.centroid.y);
-      ofRotate(ofLerp(0, item.eyesAngle, interpolate) , 0, 0, 1);
-      ofTranslate(-item.centroid.x, -item.centroid.y);
-      images[index].draw(0, 0);
-  
-      // draw face points
-      if(annotationSize > 0) {
-        for(auto p : item.points) {
-          ofPushStyle();
-            ofDrawCircle(p.x, p.y, annotationSize/scale);
-          ofPopStyle();
-        }
-      }
-  
-    ofPopMatrix();
-  fbos[index].end();
-}
 
 void ofApp::onImageLoaded(ofxThreadedImageLoader::ThreadedLoaderEvent &e) {
   
@@ -413,9 +420,14 @@ void ofApp::keyPressed(int key){
   if(key == 'r') {
       detector.resetBackground(resetBackgroundDelay, ofRectangle(0, 0, camWidth, camHeight));
   }
+  
+  if(key == 'r') {
+    onToggleRotation();
+  }
+  
   if(key == 'f') {
     ofToggleFullscreen();
-    updateCanvas();
+    updateCanvasSize();
   }
 }
 
