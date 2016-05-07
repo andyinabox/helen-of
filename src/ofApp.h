@@ -13,7 +13,8 @@
 class ofApp : public ofBaseApp{
 
 	public:
-  
+
+    // our data structure for helen images
     struct HelenDatum {
       string fileName;
       int imageWidth;
@@ -30,31 +31,36 @@ class ofApp : public ofBaseApp{
       float eyesAngle;
       float area;
     };
+
   
-  
+    // standard app methods
 		void setup();
 		void update();
 		void draw();
-  
-    void onTransitionChange(float &transition);
-  
+    void drawGui();
+    void exit();
+
+    // loading new images
     void next();
+//    void prev();
   
+    // fbo management functions
+    void addFbo(HelenDatum item, bool draw=true);
+    void pushFbo(HelenDatum item, ofImage &img , bool draw=true);
+    void drawFbo(HelenDatum item, int index);
+  
+    // misc utility methods
     float getWidth();
     float getHeight();
-  
-    void addHelenFbo(HelenDatum item, bool draw=true);
-    void pushHelenFbo(HelenDatum item, ofImage &img , bool draw=true);
-//    void pushHelenFbo(ofxJSONElement item, bool draw=true);
-    void drawHelenFbo(HelenDatum item, int index);
-  
-    void imageLoaded(ofxThreadedImageLoader::ThreadedLoaderEvent &e);
-  
-    vector<HelenDatum> parseData(ofxJSONElement data);
     string getImagePath(HelenDatum item);
     string getSharedPath(string path);
     ofVec2f getCentroid(vector<ofVec2f> annotations, int start, int end);
-//    HelenDatum getAverageAnnotations(vector<HelenDatum> data, int start, int end);
+    vector<HelenDatum> parseData(ofxJSONElement data);
+
+    // event callbacks
+    void onTransitionChange(float &transition);
+    void onImageLoaded(ofxThreadedImageLoader::ThreadedLoaderEvent &e);
+  
 
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -67,15 +73,44 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
+
+    // constants
+    const int imageCount = 10;
+    const int RIGHT_EYE_START = 114;
+    const int RIGHT_EYE_END = 133;
+    const int LEFT_EYE_START = 134;
+    const int LEFT_EYE_END = 153;
+    const int MOUTH_OUTLINE_START = 58;
+    const int MOUTH_OUTLINE_END = 85;
 		
     bool showGui = true;
     bool playing = false;
     int currentIndex = 0;
     int imageOffset = 0;
-  
+    int camWidth = 360;
+    int camHeight = 240;
+    int detectRegionWidth = camWidth;
+    int detectRegionHeight = camHeight;
     float annotationSize;
     float avgDisplacement;
+    ofVec2f displacementDirection;
   
+    // our dataset
+    ofxJSONElement json;
+    vector<HelenDatum> data;
+    vector<ofImage> images;
+    vector<ofFbo> fbos;
+  
+    // misc
+    ofVideoGrabber grabber;
+    Detector detector;
+    ofImage nextImage;
+    ofShader avg;
+    ShaderScreen screen;
+    ofFbo canvas;
+    ofxThreadedImageLoader imageLoader;
+
+    // gui
     ofxPanel gui;
   
     // general
@@ -102,31 +137,7 @@ class ofApp : public ofBaseApp{
     ofxToggle useDetection;
     ofxIntSlider resetBackgroundDelay;
   
-    ofVec2f displacementDirection;
-  
-    int camWidth = 360;
-    int camHeight = 240;
-    int detectRegionWidth = camWidth;
-    int detectRegionHeight = camHeight;
-    ofVideoGrabber grabber;
-    Detector detector;
-  
-    vector<HelenDatum> data;
-    ofxJSONElement json;
-    ofxJSONElement current;
-    ofImage nextImage;
-    vector<ofImage> images;
-    vector<ofFbo> fbos;
-    ofShader avg;
-    ShaderScreen screen;
-    ofFbo canvas;
-    ofxThreadedImageLoader imageLoader;
-  
-    const int imageCount = 10;
-    const int RIGHT_EYE_START = 114;
-    const int RIGHT_EYE_END = 133;
-    const int LEFT_EYE_START = 134;
-    const int LEFT_EYE_END = 153;
-    const int MOUTH_OUTLINE_START = 58;
-    const int MOUTH_OUTLINE_END = 85;
+
+
+
 };

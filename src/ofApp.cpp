@@ -1,6 +1,5 @@
 #include "ofApp.h"
 
-//--------------------------------------------------------------
 void ofApp::setup(){
   ofSetVerticalSync(true);
   ofSetFrameRate(30);
@@ -58,7 +57,7 @@ void ofApp::setup(){
   
   // load images and allocate fbos
   for(currentIndex; currentIndex < imageCount; currentIndex++) {
-    addHelenFbo(data[currentIndex]);
+    addFbo(data[currentIndex]);
   }
 
 
@@ -66,12 +65,11 @@ void ofApp::setup(){
   avg.load("shaders/avg");
   
   screen.setup(ofApp::getWidth(), ofApp::getHeight());
-  ofAddListener(imageLoader.ThreadedLoaderE, this, &ofApp::imageLoaded);
+  ofAddListener(imageLoader.ThreadedLoaderE, this, &ofApp::onImageLoaded);
   
 
 }
 
-//------------------------------------------------facePoints--------------
 void ofApp::update(){
 
 
@@ -101,7 +99,7 @@ void ofApp::update(){
 
 
   for(int i = 0; i < fbos.size(); i++) {
-    drawHelenFbo( data[currentIndex-(imageCount)+i], i);
+    drawFbo( data[currentIndex-(imageCount)+i], i);
   }
   
   canvas.begin();
@@ -125,8 +123,6 @@ void ofApp::update(){
       screen.draw();
     
     avg.end();
-
-//    fbos[0].draw(0, 0);
 
     if(topAnnotationsOpacity > 0) {
 
@@ -154,27 +150,31 @@ void ofApp::update(){
   canvas.end();
 }
 
-//--------------------------------------------------------------
 void ofApp::draw(){
   ofClear(0);
   
-    ofPushMatrix();
-  
-      #ifdef INSTALLATION_MODE
-        ofTranslate((ofGetWidth()-ofApp::getWidth())/2, (ofGetHeight()-ofApp::getHeight())/2);
+  ofPushMatrix();
+
+    #ifdef INSTALLATION_MODE
+      ofTranslate((ofGetWidth()-ofApp::getWidth())/2, (ofGetHeight()-ofApp::getHeight())/2);
 //        ofTranslate(canvas.getWidth()/2, canvas.getHeight()/2);
 //        ofRotate(-90, 0, 0, 1);
 //        ofTranslate(-canvas.getWidth()/2, -canvas.getHeight()/2);
-      #else
-        ofTranslate((ofGetWidth()-ofApp::getWidth())/2, 0);
-      #endif
-      canvas.draw(0, 0);
-    ofPopMatrix();
+    #else
+      ofTranslate((ofGetWidth()-ofApp::getWidth())/2, 0);
+    #endif
+    canvas.draw(0, 0);
+  ofPopMatrix();
   
   if(showGui) {
-    gui.draw();
-    detector.draw(ofGetWidth()-(camWidth/2), ofGetHeight()-(camHeight/2), camWidth/2, camHeight/2);
+    drawGui();
   }
+}
+
+
+void ofApp::drawGui() {
+  gui.draw();
+  detector.draw(ofGetWidth()-(camWidth/2), ofGetHeight()-(camHeight/2), camWidth/2, camHeight/2);
 }
 
 void ofApp::onTransitionChange(float &transition) {
@@ -184,10 +184,9 @@ void ofApp::onTransitionChange(float &transition) {
   avgDisplacement = ofLerp(maxDisplacement, minDisplacement, transition);
 }
 
-
+void ofApp::exit() {}
 
 void ofApp::next() {
-//  nextImage = ofImage();
   imageLoader.loadFromDisk(nextImage, getImagePath(data[currentIndex]));
 }
 
@@ -199,7 +198,7 @@ float ofApp::getHeight() {
   return canvas.getHeight();
 }
 
-void ofApp::addHelenFbo(ofApp::HelenDatum item, bool draw) {
+void ofApp::addFbo(ofApp::HelenDatum item, bool draw) {
 
     ofImage img;
     img.load(getImagePath(item));
@@ -211,28 +210,28 @@ void ofApp::addHelenFbo(ofApp::HelenDatum item, bool draw) {
     fbos.push_back(fbo);
   
     if(images.size() > imageCount) {
-      ofLogNotice("ofApp::addHelenFbo") << "remove last image";
+      ofLogNotice("ofApp::addFbo") << "remove last image";
       images.erase(images.begin());
       fbos.erase(fbos.begin());
     }
   
     if(draw) {
-      drawHelenFbo(item, images.size()-1);
+      drawFbo(item, images.size()-1);
     }
 }
 
-void ofApp::pushHelenFbo(HelenDatum item, ofImage &img, bool draw) {
+void ofApp::pushFbo(HelenDatum item, ofImage &img, bool draw) {
   int end = images.size() - 1;
 
   images.push_back(img);
   images.erase(images.begin());
 
   if(draw) {
-    drawHelenFbo(item, end);
+    drawFbo(item, end);
   }
 }
 
-void ofApp::drawHelenFbo(HelenDatum item, int index) {
+void ofApp::drawFbo(HelenDatum item, int index) {
 
   float interpolate = faceAlign;
   float centeredScale = scaleFactor / item.area;
@@ -270,17 +269,13 @@ void ofApp::drawHelenFbo(HelenDatum item, int index) {
         }
       }
   
-//      ofSetColor(0, 0, 255);
-//      ofDrawLine(leftEyeCentroid, rightEyeCentroid);
-//      ofDrawCircle(faceCentroid, 10/scale);
-  
     ofPopMatrix();
   fbos[index].end();
 }
 
-void ofApp::imageLoaded(ofxThreadedImageLoader::ThreadedLoaderEvent &e) {
+void ofApp::onImageLoaded(ofxThreadedImageLoader::ThreadedLoaderEvent &e) {
   
-  pushHelenFbo(data[currentIndex], nextImage, false);
+  pushFbo(data[currentIndex], nextImage, false);
   
   if(currentIndex < data.size() - 1) {
     currentIndex++;
@@ -341,15 +336,6 @@ string ofApp::getSharedPath(string path) {
   return ofFilePath::join("../../../shared/", path);
 }
 
-//ofVec2f ofApp::getCentroid(ofxJSONElement annotations, int start, int end) {
-//    vector<ofVec2f> a;
-//  
-//    for(auto p : annotations) {
-//      a.push_back(ofVec2f(p[0].asFloat(), p[1].asFloat()));
-//    }
-//  
-//    return getCentroid(a, start, end);
-//}
 
 ofVec2f ofApp::getCentroid(vector<ofVec2f> annotations, int start, int end) {
     float xt = 0;
@@ -368,31 +354,8 @@ ofVec2f ofApp::getCentroid(vector<ofVec2f> annotations, int start, int end) {
     return ofVec2f(xt/count, yt/count);
 }
 
-//ofApp::HelenDatum ofApp::getAverageAnnotations(vector<HelenDatum> data, int start, int end) {
-//  ofApp::HelenDatum average;
-//  int count = end - start;
-//
-//  // add empty points
-//  for(auto p : data[start].points) {
-//    average.points.push_back(ofVec2f(0, 0));
-//  }
-//
-//  // add points
-//  for(int i = start; i < end; i++) {
-//    for(int j = 0; j < data[i].points.size(); j++) {
-//      average.points[j] += data[i].points[j];
-//    }
-//  }
-//  
-//  for(auto p : data[start].points) {
-//    average.points.push_back(ofVec2f(0, 0));
-//  }
-//  
-//  return average;
-//}
 
 
-//--------------------------------------------------------------
 void ofApp::keyPressed(int key){
   if(key == ' ') {
     playing = !playing;
@@ -423,52 +386,13 @@ void ofApp::keyPressed(int key){
 
 }
 
-//--------------------------------------------------------------
-void ofApp::keyReleased(int key){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y ){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseEntered(int x, int y){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseExited(int x, int y){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::windowResized(int w, int h){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo){ 
-
-}
+void ofApp::keyReleased(int key){}
+void ofApp::mouseMoved(int x, int y ){}
+void ofApp::mouseDragged(int x, int y, int button){}
+void ofApp::mousePressed(int x, int y, int button){}
+void ofApp::mouseReleased(int x, int y, int button){}
+void ofApp::mouseEntered(int x, int y){}
+void ofApp::mouseExited(int x, int y){}
+void ofApp::windowResized(int w, int h){}
+void ofApp::gotMessage(ofMessage msg){}
+void ofApp::dragEvent(ofDragInfo dragInfo){}
