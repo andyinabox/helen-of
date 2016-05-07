@@ -10,6 +10,8 @@
 
 //#define INSTALLATION_MODE
 
+#define EXHIBITION
+
 class ofApp : public ofBaseApp{
 
 	public:
@@ -36,6 +38,8 @@ class ofApp : public ofBaseApp{
     // standard app methods
 		void setup();
 		void update();
+    void updateCanvas();
+
 		void draw();
     void drawGui();
     void exit();
@@ -43,7 +47,6 @@ class ofApp : public ofBaseApp{
     // loading new images
     void next();
 //    void prev();
-  
   
     // fbo management functions
     void addFbo(HelenDatum item, bool draw=true);
@@ -61,7 +64,8 @@ class ofApp : public ofBaseApp{
     // event callbacks
     void onTransitionChange(float &transition);
     void onImageLoaded(ofxThreadedImageLoader::ThreadedLoaderEvent &e);
-  
+     void onToggleRotation();
+ 
 
 		void keyPressed(int key);
 		void keyReleased(int key);
@@ -86,6 +90,8 @@ class ofApp : public ofBaseApp{
 		
     bool showGui = true;
     bool playing = false;
+    bool rotated = true;
+  
     int currentIndex = 0;
     int imageOffset = 0;
     int camWidth = 360;
@@ -117,7 +123,8 @@ class ofApp : public ofBaseApp{
     // general
     ofxToggle loadOnPlay;
     ofxFloatSlider transition;
-  
+    ofxButton toggleRotation;
+
     // transforms
 		ofxLabel transformsLabel;
     ofxFloatSlider faceAlign;

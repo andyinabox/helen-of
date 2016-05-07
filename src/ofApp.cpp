@@ -4,20 +4,14 @@ void ofApp::setup(){
   ofSetVerticalSync(true);
   ofSetFrameRate(30);
 
-  #ifdef INSTALLATION_MODE
-    ofSetFullscreen(true);
-    canvas.allocate(ofGetHeight(), ofGetWidth());
-  #else 
-    canvas.allocate(ofGetHeight()*0.75, ofGetHeight());
-  #endif
-  
   transition.addListener(this, &ofApp::onTransitionChange);
+  toggleRotation.addListener(this, &ofApp::onToggleRotation);
 
   gui.setup();
   
   gui.add(loadOnPlay.setup("New img loading", true));
   gui.add(transition.setup("Transition", 0.0, 0.0, 1.0));
-  
+  gui.add(toggleRotation.setup("Toggle rotation"));
 
   gui.add(transformsLabel.setup("// TRANSFORMS", ""));
   gui.add(faceAlign.setup("Face align", 1.0, 0.0, 1.0));
@@ -45,15 +39,17 @@ void ofApp::setup(){
   gui.loadFromFile("settings.xml");
 
   displacementDirection = ofVec2f(0, 0);
-
-  bool parsingSuccessful = json.open("../../../shared/annotations.json");
   
-  if(parsingSuccessful) {
+  
+  
+  if(json.open("../../../shared/annotations.json")) {
     ofLogNotice("ofApp::setup") << "Parsing successful!";
     data = parseData(json);
   } else {
     ofLogNotice("ofApp::setup") << "Failed parsing";
   }
+  
+  updateCanvas();
   
   // load images and allocate fbos
   for(currentIndex; currentIndex < imageCount; currentIndex++) {
@@ -104,6 +100,9 @@ void ofApp::update(){
   
   canvas.begin();
     ofClear(0);
+  
+    ofDrawRectangle(0, 0, canvas.getWidth(), canvas.getHeight());
+  
     avg.begin();
   
       // set standard uniforms
@@ -131,8 +130,8 @@ void ofApp::update(){
     
       ofPushMatrix();
         ofTranslate(
-          ofApp::getWidth()/2 - latest.centroid.x*scale,
-          ofApp::getHeight()/2 - latest.centroid.y*scale
+          canvas.getWidth()/2 - latest.centroid.x*scale,
+          canvas.getHeight()/2 - latest.centroid.y*scale
         );
         ofScale(scale, scale);
         ofTranslate(latest.centroid.x, latest.centroid.y);
@@ -146,35 +145,66 @@ void ofApp::update(){
         }
       ofPopMatrix();
     }
-
+  
   canvas.end();
+  
+}
+
+
+void ofApp::updateCanvas() {
+  int newWidth, newHeight;
+  
+  if(rotated) {
+    newWidth = ofGetHeight();
+    newHeight = ofGetWidth();
+  } else {
+    newWidth = ofGetHeight()*0.75;
+    newHeight = ofGetHeight();
+  }
+  ofLogNotice("updateCanvas") << newWidth << " " << newHeight;
+  
+  canvas.allocate(newWidth, newHeight);
+  screen.update(newWidth, newHeight);
+  
+  for(auto fbo : fbos) {
+    fbo.clear();
+    fbo.allocate(newWidth, newHeight);
+    ofLogNotice("updateCanvas:fbo") << fbo.getWidth() << " " << fbo.getHeight();
+  }
+  
 }
 
 void ofApp::draw(){
   ofClear(0);
-  
-  ofPushMatrix();
 
-    #ifdef INSTALLATION_MODE
-      ofTranslate((ofGetWidth()-ofApp::getWidth())/2, (ofGetHeight()-ofApp::getHeight())/2);
-//        ofTranslate(canvas.getWidth()/2, canvas.getHeight()/2);
-//        ofRotate(-90, 0, 0, 1);
-//        ofTranslate(-canvas.getWidth()/2, -canvas.getHeight()/2);
-    #else
-      ofTranslate((ofGetWidth()-ofApp::getWidth())/2, 0);
-    #endif
-    canvas.draw(0, 0);
-  ofPopMatrix();
+    ofPushMatrix();
+      if(rotated) {
+        ofTranslate((ofGetWidth()-ofApp::getWidth())/2, (ofGetHeight()-ofApp::getHeight())/2);
+        ofTranslate(canvas.getWidth()/2, canvas.getHeight()/2);
+        ofRotate(-90, 0, 0, 1);
+        ofTranslate(-canvas.getWidth()/2, -canvas.getHeight()/2);
+      } else {
+        ofTranslate((ofGetWidth()-ofApp::getWidth())/2, 0);
+      }
+      canvas.draw(0, 0);
+    ofPopMatrix();
+  
+    ofDrawBitmapStringHighlight(ofToString(fbos[0].getWidth()) + " " + ofToString(fbos[0].getHeight()) , 10, 10);
+  
   
   if(showGui) {
     drawGui();
   }
 }
 
-
 void ofApp::drawGui() {
   gui.draw();
   detector.draw(ofGetWidth()-(camWidth/2), ofGetHeight()-(camHeight/2), camWidth/2, camHeight/2);
+}
+
+void ofApp::onToggleRotation() {
+  rotated  = !rotated;
+  updateCanvas();
 }
 
 void ofApp::onTransitionChange(float &transition) {
@@ -191,11 +221,11 @@ void ofApp::next() {
 }
 
 float ofApp::getWidth() {
-  return canvas.getWidth();
+  return canvas.getWidth(); //rotated ? canvas.getHeight() : canvas.getWidth();
 }
 
 float ofApp::getHeight() {
-  return canvas.getHeight();
+  return canvas.getHeight(); //rotated ? canvas.getWidth() : canvas.getHeight();
 }
 
 void ofApp::addFbo(ofApp::HelenDatum item, bool draw) {
@@ -248,9 +278,14 @@ void ofApp::drawFbo(HelenDatum item, int index) {
     ofApp::getHeight()/2 - item.centroid.y*scale
   );
   ofVec2f faceTranslation = defaultTranslation.getInterpolated(centeredTranslation, interpolate);
-
+  
   fbos[index].begin();
     ofClear(0);
+  
+    ofPushStyle();
+      ofSetColor(0, 255, 0);
+      ofDrawRectangle(0, 0, fbos[index].getWidth(), fbos[index].getHeight());
+    ofPopStyle();
 
     ofPushMatrix();
       ofTranslate(faceTranslation.x, faceTranslation.y);
@@ -383,7 +418,10 @@ void ofApp::keyPressed(int key){
   if(key == 'r') {
       detector.resetBackground(resetBackgroundDelay, ofRectangle(0, 0, camWidth, camHeight));
   }
-
+  if(key == 'f') {
+    ofToggleFullscreen();
+    updateCanvas();
+  }
 }
 
 void ofApp::keyReleased(int key){}
