@@ -78,24 +78,24 @@ class ofApp : public ofBaseApp{
   
     ofxPanel gui;
   
+    // general
     ofxToggle loadOnPlay;
     ofxFloatSlider transition;
   
-  
+    // transforms
 		ofxLabel transformsLabel;
     ofxFloatSlider faceAlign;
     ofxFloatSlider scaleFactor;
     ofxFloatSlider maxDisplacement;
     ofxFloatSlider minDisplacement;
   
+    // annotations
     ofxLabel annotationsLabel;
     ofxFloatSlider topAnnotationsOpacity;
     ofxFloatSlider maxAnnotationSize;
     ofxFloatSlider minAnnotationSize;
 
-  
-  
-        // detection
+    // detection
 		ofxLabel detectLabel;
     ofxFloatSlider detectThreshold;
     ofxFloatSlider detectUpperThreshold;
