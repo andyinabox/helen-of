@@ -15,15 +15,33 @@ void ofApp::setup(){
   transition.addListener(this, &ofApp::onTransitionChange);
 
   gui.setup();
-  gui.add(scaleFactor.setup("Scale factor", 300, 1, 500));
-  gui.add(topAnnotationsOpacity.setup("Top annotations", 0., 0.0, 1.0));
-  gui.add(faceAlign.setup("Face align", 1.0, 0.0, 1.0));
-  gui.add(maxAnnotationSize.setup("Max annotation size", 5.0, 0.0, 10.0));
-  gui.add(minAnnotationSize.setup("Min annotation size", 0.0, 0.0, 10.0));
-  gui.add(maxDisplacement.setup("Max displacement", 5.0, 0.0, 10.0));
-  gui.add(minDisplacement.setup("Min displacement", 0.3, 0.0, 10.0));
+  
+  gui.add(loadOnPlay.setup("New img loading", true));
   gui.add(transition.setup("Transition", 0.0, 0.0, 1.0));
-  gui.add(loadOnPlay.setup("Continuous image loading", true));
+  
+
+  gui.add(transformsLabel.setup("// TRANSFORMS", ""));
+  gui.add(faceAlign.setup("Face align", 1.0, 0.0, 1.0));
+  gui.add(scaleFactor.setup("Scale", 300, 1, 500));
+  gui.add(maxDisplacement.setup("Begin displacement", 5.0, 0.0, 10.0));
+  gui.add(minDisplacement.setup("End displacement", 0.3, 0.0, 10.0));
+
+  gui.add(annotationsLabel.setup("// ANNOTATIONS", ""));
+  gui.add(topAnnotationsOpacity.setup("Top annotation opacity", 0., 0.0, 1.0));
+  gui.add(maxAnnotationSize.setup("Begin annotation size", 5.0, 0.0, 10.0));
+  gui.add(minAnnotationSize.setup("End annotation size", 0.0, 0.0, 10.0));
+  
+  gui.add(detectLabel.setup("// DETECTION", ""));
+  gui.add(useDetection.setup("Use detection", true));
+	gui.add(detectThreshold.setup("Detect lower threshold", 0.1, 0.0, 1.0));
+	gui.add(detectUpperThreshold.setup("Detect upper threshold", 0.8, 0.0, 1.0));
+  gui.add(resetBackgroundDelay.setup("Reset delay", 1000, 0, 120000));
+
+	// video grabber setup
+	grabber.setDesiredFrameRate(30);
+	grabber.initGrabber(camWidth ,camHeight);
+  detector.setup(ofRectangle(0, 0, camWidth, camHeight), detectThreshold, 300, 10);
+
   
   gui.loadFromFile("settings.xml");
 
@@ -49,10 +67,14 @@ void ofApp::setup(){
   
   screen.setup(ofApp::getWidth(), ofApp::getHeight());
   ofAddListener(imageLoader.ThreadedLoaderE, this, &ofApp::imageLoaded);
+  
+
 }
 
 //------------------------------------------------facePoints--------------
 void ofApp::update(){
+
+
   if(playing) {
     if(imageOffset < imageCount-1) {
       imageOffset++;
@@ -60,6 +82,23 @@ void ofApp::update(){
       imageOffset = 0;
     }
   }
+  
+  if(useDetection) {
+  
+    grabber.update();
+    if(grabber.isFrameNew()) {
+      detector.setPresenceThreshold(detectThreshold);
+      detector.update(grabber);
+    }
+    
+    float presence = detector.getPresence();
+    if(presence > detectThreshold) {
+      transition = ofMap(presence, detectThreshold, detectUpperThreshold, 0.0, 1.0, true);
+    }
+  }
+  
+
+
 
   for(int i = 0; i < fbos.size(); i++) {
     drawHelenFbo( data[currentIndex-(imageCount)+i], i);
@@ -123,9 +162,9 @@ void ofApp::draw(){
   
       #ifdef INSTALLATION_MODE
         ofTranslate((ofGetWidth()-ofApp::getWidth())/2, (ofGetHeight()-ofApp::getHeight())/2);
-        ofTranslate(canvas.getWidth()/2, canvas.getHeight()/2);
-        ofRotate(-90, 0, 0, 1);
-        ofTranslate(-canvas.getWidth()/2, -canvas.getHeight()/2);
+//        ofTranslate(canvas.getWidth()/2, canvas.getHeight()/2);
+//        ofRotate(-90, 0, 0, 1);
+//        ofTranslate(-canvas.getWidth()/2, -canvas.getHeight()/2);
       #else
         ofTranslate((ofGetWidth()-ofApp::getWidth())/2, 0);
       #endif
@@ -134,6 +173,7 @@ void ofApp::draw(){
   
   if(showGui) {
     gui.draw();
+    detector.draw(ofGetWidth()-(camWidth/2), ofGetHeight()-(camHeight/2), camWidth/2, camHeight/2);
   }
 }
 
@@ -376,6 +416,11 @@ void ofApp::keyPressed(int key){
   if(key == 's') {
     gui.saveToFile("settings.xml");
   }
+  
+  if(key == 'r') {
+      detector.resetBackground(resetBackgroundDelay, ofRectangle(0, 0, camWidth, camHeight));
+  }
+
 }
 
 //--------------------------------------------------------------

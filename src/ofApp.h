@@ -6,8 +6,9 @@
 #include "ofxThreadedImageLoader.h"
 
 #include "ShaderScreen.h"
+#include "Detector.h"
 
-//#define INSTALLATION_MODE
+#define INSTALLATION_MODE
 
 class ofApp : public ofBaseApp{
 
@@ -76,16 +77,39 @@ class ofApp : public ofBaseApp{
     float avgDisplacement;
   
     ofxPanel gui;
-    ofxFloatSlider scaleFactor;
-    ofxFloatSlider topAnnotationsOpacity;
+  
+    ofxToggle loadOnPlay;
+    ofxFloatSlider transition;
+  
+  
+		ofxLabel transformsLabel;
     ofxFloatSlider faceAlign;
-    ofxFloatSlider maxAnnotationSize;
-    ofxFloatSlider minAnnotationSize;
+    ofxFloatSlider scaleFactor;
     ofxFloatSlider maxDisplacement;
     ofxFloatSlider minDisplacement;
-    ofxFloatSlider transition;
-    ofxToggle loadOnPlay;
+  
+    ofxLabel annotationsLabel;
+    ofxFloatSlider topAnnotationsOpacity;
+    ofxFloatSlider maxAnnotationSize;
+    ofxFloatSlider minAnnotationSize;
+
+  
+  
+        // detection
+		ofxLabel detectLabel;
+    ofxFloatSlider detectThreshold;
+    ofxFloatSlider detectUpperThreshold;
+    ofxToggle useDetection;
+    ofxIntSlider resetBackgroundDelay;
+  
     ofVec2f displacementDirection;
+  
+    int camWidth = 360;
+    int camHeight = 240;
+    int detectRegionWidth = camWidth;
+    int detectRegionHeight = camHeight;
+    ofVideoGrabber grabber;
+    Detector detector;
   
     vector<HelenDatum> data;
     ofxJSONElement json;
