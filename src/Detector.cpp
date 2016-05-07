@@ -26,7 +26,6 @@ void Detector::setup(ofRectangle r, float thresh, int lTime, int tValue) {
 }
 
 void Detector::update(ofVideoGrabber &frame) {
-//    cropped.cropFrom(frame, region.x, region.y, region.getWidth(), region.getHeight());
 
     cv::Mat roi;
     cv::Mat frameMat;
