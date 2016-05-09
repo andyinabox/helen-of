@@ -3,6 +3,8 @@
 void ofApp::setup(){
   ofSetVerticalSync(true);
   ofSetFrameRate(30);
+  
+  ofSetFullscreen(true);
 
   // load data
   if(json.open("../../../shared/annotations.json")) {
@@ -33,6 +35,7 @@ void ofApp::setup(){
   gui.add(useDetection.setup("Use detection", true));
 	gui.add(detectThreshold.setup("Detect lower threshold", 0.1, 0.0, 1.0));
 	gui.add(detectUpperThreshold.setup("Detect upper threshold", 0.8, 0.0, 1.0));
+	gui.add(detectOutputLimit.setup("Detect output limit", 0.75, 0.0, 1.0));
   gui.add(resetBackgroundDelay.setup("Reset delay", 1000, 0, 120000));
   gui.loadFromFile("settings.xml");
 
@@ -86,11 +89,15 @@ void ofApp::update(){
       detector.setPresenceThreshold(detectThreshold);
       detector.update(grabber);
       tracker.update(ofxCv::toCv(grabber));
-    }
-    
-    // update transition value based on presence
-    if(detector.isPresent()) {
-      transition = ofMap(detector.getPresence(), detectThreshold, detectUpperThreshold, 0.0, 1.0, true);
+      
+      // update transition value based on presence
+      if(tracker.getFound()) {
+        transition = 1.0;
+      } else if (detector.isPresent()) {
+        transition = ofMap(detector.getPresence(), detectThreshold, detectUpperThreshold, 0.0, detectOutputLimit, true);
+      } else {
+        transition = 0.0;
+      }
     }
   }
   
@@ -110,8 +117,6 @@ void ofApp::update(){
     if(topAnnotationsOpacity > 0) {
       drawAnnotations();
     }
-  
-//    tracker.draw();
   
   canvas.end();
   
@@ -159,7 +164,6 @@ void ofApp::draw(){
       canvas.draw(0, 0);
   
     ofPopMatrix();
-  
   
   if(showGui) {
     drawGui();
@@ -273,7 +277,7 @@ void ofApp::onTransitionChange(float &transition) {
 
 void ofApp::exit() {
   tracker.waitForThread();
-  imageLoader.waitForThread();
+//  imageLoader.waitForThread();
 }
 
 void ofApp::next() {
@@ -429,7 +433,7 @@ void ofApp::keyPressed(int key){
     gui.saveToFile("settings.xml");
   }
   
-  if(key == 'r') {
+  if(key == 'b') {
       detector.resetBackground(resetBackgroundDelay, ofRectangle(0, 0, camWidth, camHeight));
   }
   

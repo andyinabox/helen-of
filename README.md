@@ -33,12 +33,18 @@ Todo
 ----
 
 ### 1.0.0
-- [ ] Saving settings
-- [ ] Allow for sideways projector mode
+- [x] Saving settings
+- [x] Allow for sideways projector mode 
+ - [x] BUG scaling at edges becomes stretch lines
+- [ ] Fix performance issues on image loading
+- [ ] BUG gets stuck at end of cycle
 - [ ] Variable speed
 - [ ] Interactivity
- - [ ] Presense detection
- - [ ] Face detection
+ - [x] Presense detection
+  - [ ] BUG doesn't seem like this is working very well?
+ - [x] Face detection
+   - [ ] Ease in zoom
+ - [ ] Superimpose image
 
 
 ## Misc

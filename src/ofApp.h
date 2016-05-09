@@ -8,10 +8,9 @@
 #include "ofxFaceTrackerThreaded.h"
 
 
-#define USE_PS3EYE 
+//#define USE_PS3EYE 
 
 #ifdef USE_PS3EYE
-//#include "ofxKinect.h"
 #include "ofxPS3EyeGrabber.h"
 #endif
 
@@ -100,7 +99,7 @@ class ofApp : public ofBaseApp{
 		
     bool showGui = true;
     bool playing = false;
-    bool rotated = false;
+    bool rotated = true;
   
     int currentIndex = 0;
     int imageOffset = 0;
@@ -153,6 +152,7 @@ class ofApp : public ofBaseApp{
 		ofxLabel detectLabel;
     ofxFloatSlider detectThreshold;
     ofxFloatSlider detectUpperThreshold;
+    ofxFloatSlider detectOutputLimit;
     ofxToggle useDetection;
     ofxIntSlider resetBackgroundDelay;
   
