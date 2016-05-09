@@ -37,7 +37,7 @@ Todo
 - [x] Allow for sideways projector mode 
  - [x] BUG scaling at edges becomes stretch lines
 - [ ] Fix performance issues on image loading
-- [ ] BUG gets stuck at end of cycle
+- [x] BUG gets stuck at end of cycle
 - [ ] Variable speed
 - [ ] Interactivity
  - [x] Presense detection

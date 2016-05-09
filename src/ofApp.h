@@ -101,7 +101,7 @@ class ofApp : public ofBaseApp{
     bool playing = false;
     bool rotated = true;
   
-    int currentIndex = 0;
+//    int currentIndex = 0;
     int imageOffset = 0;
     int camWidth = 640;
     int camHeight = 480;
@@ -134,6 +134,7 @@ class ofApp : public ofBaseApp{
     ofxToggle loadOnPlay;
     ofxFloatSlider transition;
     ofxButton toggleRotation;
+    ofxIntSlider currentIndex;
 
     // transforms
 		ofxLabel transformsLabel;

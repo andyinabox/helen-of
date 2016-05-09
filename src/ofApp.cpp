@@ -19,6 +19,7 @@ void ofApp::setup(){
   toggleRotation.addListener(this, &ofApp::onToggleRotation);
   
   gui.setup();
+  gui.add(currentIndex.setup("Current index", 0, 0, data.size()-1));
   gui.add(loadOnPlay.setup("New img loading", true));
   gui.add(transition.setup("Transition", 0.0, 0.0, 1.0));
   gui.add(toggleRotation.setup("Toggle rotation"));
@@ -60,7 +61,7 @@ void ofApp::setup(){
   ofAddListener(imageLoader.ThreadedLoaderE, this, &ofApp::onImageLoaded);
 
   // load images and allocate fbos
-  for(currentIndex; currentIndex < imageCount; currentIndex++) {
+  for(currentIndex; currentIndex < imageCount; currentIndex=currentIndex+1) {
     addFbo(data[currentIndex]);
   }
 
@@ -103,7 +104,8 @@ void ofApp::update(){
   
   // go through and redraw all of the fbos
   for(int i = 0; i < fbos.size(); i++) {
-    drawFbo( data[currentIndex-(imageCount)+i], i);
+    ofLogNotice("ofApp::update") << "Draw fbo for index " << (currentIndex-(imageCount)+i);
+    drawFbo( data[abs(currentIndex-(imageCount)+i)], i);
   }
   
   // update the canvas fbo
@@ -331,7 +333,7 @@ void ofApp::onImageLoaded(ofxThreadedImageLoader::ThreadedLoaderEvent &e) {
   pushFbo(data[currentIndex], nextImage, false);
   
   if(currentIndex < data.size() - 1) {
-    currentIndex++;
+    currentIndex=currentIndex+1;
   } else {
     currentIndex = 0;
   }
