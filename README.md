@@ -4,6 +4,13 @@ Helen
 Release Notes
 -------------
 
+### 0.2.0
+
+ * Incorporated ps3eye camera
+ * Incorporated `ofxFaceTracker`
+ * Fixed bug where app was hanging at end of image list
+ * Functional fix to stretched edges when canvas is resized
+
 ### 0.1.4
 
  * Added basic background subtraction to control image
