@@ -3,16 +3,16 @@
 #include "ofMain.h"
 #include "ofxJSON.h"
 #include "ofxGui.h"
-#include "ofxThreadedImageLoader.h"
+#include "ofxEventThreadedImageLoader.h"
 #include "ofxCv.h"
 #include "ofxFaceTrackerThreaded.h"
 
 
 //#define USE_PS3EYE 
 
-#ifdef USE_PS3EYE
-#include "ofxPS3EyeGrabber.h"
-#endif
+//#ifdef USE_PS3EYE
+//#include "ofxPS3EyeGrabber.h"
+//#endif
 
 
 #include "ShaderScreen.h"
@@ -72,7 +72,7 @@ class ofApp : public ofBaseApp{
 
     // event callbacks
     void onTransitionChange(float &transition);
-    void onImageLoaded(ofxThreadedImageLoader::ThreadedLoaderEvent &e);
+    void onImageLoaded(ofxTILEvent &e);
      void onToggleRotation();
  
 
@@ -125,7 +125,7 @@ class ofApp : public ofBaseApp{
     ofShader avg;
     ShaderScreen screen;
     ofFbo canvas;
-    ofxThreadedImageLoader imageLoader;
+    ofxEventThreadedImageLoader imageLoader;
 
     // gui
     ofxPanel gui;

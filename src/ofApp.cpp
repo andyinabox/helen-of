@@ -58,7 +58,7 @@ void ofApp::setup(){
   avg.load("shaders/avg");
   
   // setup listener for image loader
-  ofAddListener(imageLoader.ThreadedLoaderE, this, &ofApp::onImageLoaded);
+  ofAddListener(ofxTILEvent().events, this, &ofApp::onImageLoaded);
 
   // load images and allocate fbos
   for(currentIndex; currentIndex < imageCount; currentIndex=currentIndex+1) {
@@ -328,7 +328,7 @@ void ofApp::pushFbo(HelenDatum item, ofImage &img, bool draw) {
 }
 
 
-void ofApp::onImageLoaded(ofxThreadedImageLoader::ThreadedLoaderEvent &e) {
+void ofApp::onImageLoaded(ofxTILEvent &e) {
   
   pushFbo(data[currentIndex], nextImage, false);
   

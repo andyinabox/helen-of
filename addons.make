@@ -1,0 +1,8 @@
+ofxCv
+ofxDelaunay
+ofxEventThreadedImageLoader
+ofxFaceTracker
+ofxGui
+ofxJSON
+ofxOpenCv
+ofxTiming
