@@ -66,7 +66,7 @@ class ofApp : public ofBaseApp{
     float getWidth();
     float getHeight();
     string getImagePath(HelenDatum item);
-    string getSharedPath(string path);
+//    string getSharedPath(string path);
     ofVec2f getCentroid(vector<ofVec2f> annotations, int start, int end);
     vector<HelenDatum> parseData(ofxJSONElement data);
 

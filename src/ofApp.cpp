@@ -7,7 +7,7 @@ void ofApp::setup(){
   ofSetFullscreen(true);
 
   // load data
-  if(json.open("../../../shared/annotations.json")) {
+  if(json.open(ofToDataPath("helen-images/annotations.json"))) {
     ofLogNotice("ofApp::setup") << "Parsing successful! " << json.size() << " entries loaded";
     data = parseData(json);
   } else {
@@ -383,13 +383,13 @@ vector<ofApp::HelenDatum> ofApp::parseData(ofxJSONElement items) {
 }
 
 string ofApp::getImagePath(ofApp::HelenDatum item) {
-  return getSharedPath(ofFilePath::join("images/", item.fileName));
+  return ofToDataPath(ofFilePath::join("helen-images/images/", item.fileName));
 }
 
 
-string ofApp::getSharedPath(string path) {
-  return ofFilePath::join("../../../shared/", path);
-}
+//string ofApp::getSharedPath(string path) {
+//  return ofFilePath::join("../../../shared/", path);
+//}
 
 
 ofVec2f ofApp::getCentroid(vector<ofVec2f> annotations, int start, int end) {

@@ -6,6 +6,9 @@
 obj/
 build/
 
+bin/data/helen-images
+helen1.xcodeproj/xcuserdata/
+
 #########################
 # general
 #########################
